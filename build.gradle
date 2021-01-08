@@ -186,7 +186,7 @@ remapJar {
 publishing {
     publications {
         maven(MavenPublication) {
-            artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
+            artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}-${project.minecraft_version}.jar") {
                 classifier null
                 builtBy remapJar
             }

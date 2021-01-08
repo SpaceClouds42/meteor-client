@@ -8,7 +8,7 @@ package minegame159.meteorclient.utils.misc.input;
 import minegame159.meteorclient.utils.misc.CursorStyle;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.glfw.GLFW;
 
 public class Input {

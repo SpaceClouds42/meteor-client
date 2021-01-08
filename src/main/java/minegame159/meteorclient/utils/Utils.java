@@ -17,7 +17,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.options.ServerList;
+import net.minecraft.client.option.ServerList;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;

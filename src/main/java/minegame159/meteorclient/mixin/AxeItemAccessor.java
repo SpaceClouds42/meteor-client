@@ -15,7 +15,7 @@ import java.util.Set;
 
 @Mixin(AxeItem.class)
 public interface AxeItemAccessor {
-    @Accessor("field_23139")
+    @Accessor("EFFECTIVE_MATERIALS")
     static Set<Material> getEffectiveMaterials() { return null; }
 
     @Accessor("EFFECTIVE_BLOCKS")
