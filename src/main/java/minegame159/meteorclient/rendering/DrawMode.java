@@ -1,13 +1,13 @@
 package minegame159.meteorclient.rendering;
 
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.render.VertexFormat;
 
 public enum DrawMode {
     Triangles,
     Lines;
 
-    public int toOpenGl() {
-        if (this == Triangles) return GL11.GL_TRIANGLES;
-        return GL11.GL_LINES;
+    public VertexFormat.DrawMode toVertexFormat() {
+        if (this == Triangles) return VertexFormat.DrawMode.TRIANGLES;
+        return VertexFormat.DrawMode.LINES;
     }
 }

@@ -37,7 +37,7 @@ public class MeshBuilder {
             offsetZ = 0;
         }
 
-        buffer.begin(drawMode.toOpenGl(), format);
+        buffer.begin(drawMode.toVertexFormat(), format);
     }
 
     public void end() {
