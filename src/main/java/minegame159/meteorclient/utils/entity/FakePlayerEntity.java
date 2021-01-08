@@ -58,6 +58,6 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     }
 
     public void despawn() {
-        removed = true;
+        setRemoved(RemovalReason.DISCARDED);
     }
 }
