@@ -109,7 +109,7 @@ public class BreakIndicators extends Module {
             smooth = pos != null && iam.getBreakingProgress() > 0;
 
             if (smooth && blocks.values().stream().noneMatch(info -> info.getPos().equals(pos))) {
-                blocks.put(mc.player.getEntityId(), new BlockBreakingInfo(mc.player.getEntityId(), pos));
+                blocks.put(mc.player.getId(), new BlockBreakingInfo(mc.player.getId(), pos));
             }
         } else {
             iam = null;

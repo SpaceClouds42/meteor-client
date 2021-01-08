@@ -618,7 +618,7 @@ public class CrystalAura extends Module {
 
         RotationUtils.packetRotate(entity);
         mc.interactionManager.attackEntity(mc.player, entity);
-        mc.world.removeEntity(entity.getEntityId());
+        mc.world.removeEntity(entity.getId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
         mc.player.getInventory().selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {

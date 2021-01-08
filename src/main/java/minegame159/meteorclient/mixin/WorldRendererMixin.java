@@ -122,7 +122,7 @@ public abstract class WorldRendererMixin {
         if(!bi.isActive())
             return;
 
-        if(!bi.multiple.get() && entityId != client.player.getEntityId())
+        if(!bi.multiple.get() && entityId != client.player.getId())
             return;
 
         if (0 <= stage && stage <= 8) {
