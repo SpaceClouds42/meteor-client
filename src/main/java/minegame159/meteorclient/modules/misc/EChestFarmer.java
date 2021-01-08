@@ -85,8 +85,8 @@ public class EChestFarmer extends Module {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
-                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
+                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.getInventory().getStack(i).getItem(), ENDER_CHEST)
+                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.getInventory().getStack(i)) == 0) {
                     slot = i;
                 }
             }
@@ -94,8 +94,8 @@ public class EChestFarmer extends Module {
                 if (mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
                 BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
                 if(mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST){
-                    if (mc.player.inventory.selectedSlot != slot) {
-                        mc.player.inventory.selectedSlot = slot;
+                    if (mc.player.getInventory().selectedSlot != slot) {
+                        mc.player.getInventory().selectedSlot = slot;
                     }
                     mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                     numLeft -= 1;
@@ -103,8 +103,8 @@ public class EChestFarmer extends Module {
                         stop = true;
                     }
                 } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
-                    if (mc.player.inventory.selectedSlot != itemResult.slot)
-                    mc.player.inventory.selectedSlot = itemResult.slot;
+                    if (mc.player.getInventory().selectedSlot != itemResult.slot)
+                    mc.player.getInventory().selectedSlot = itemResult.slot;
                     PlayerUtils.placeBlock(pos.up(), Hand.MAIN_HAND);
                 }
 

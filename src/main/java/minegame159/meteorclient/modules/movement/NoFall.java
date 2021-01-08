@@ -84,16 +84,16 @@ public class NoFall extends Module {
                 int slot = -1;
                 int preSlot;
                 for (int i = 0; i < 9; i++){
-                    if (mc.player.inventory.getStack(i).getItem() instanceof BlockItem){
+                    if (mc.player.getInventory().getStack(i).getItem() instanceof BlockItem){
                         slot = i;
                         break;
                     }
                 }
                 if (slot != -1){
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = slot;
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, -1, 0), Direction.UP, mc.player.getBlockPos().down(), false));
-                    mc.player.inventory.selectedSlot = preSlot;
+                    mc.player.getInventory().selectedSlot = preSlot;
                 }
             }
         }

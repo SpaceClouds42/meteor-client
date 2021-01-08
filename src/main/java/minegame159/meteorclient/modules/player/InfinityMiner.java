@@ -230,10 +230,10 @@ public class InfinityMiner extends Module {
 
     private Boolean isInventoryFull() {
         if (mc.player == null) return false;
-        if (mc.player.inventory.getEmptySlot() != -1) return false;
-        for (int i = 0; i < mc.player.inventory.size(); i++)
-            if (mc.player.inventory.getStack(i).getItem() == targetBlock.get().asItem() &&
-                    mc.player.inventory.getStack(i).getCount() < targetBlock.get().asItem().getMaxCount()) return false;
+        if (mc.player.getInventory().getEmptySlot() != -1) return false;
+        for (int i = 0; i < mc.player.getInventory().size(); i++)
+            if (mc.player.getInventory().getStack(i).getItem() == targetBlock.get().asItem() &&
+                    mc.player.getInventory().getStack(i).getCount() < targetBlock.get().asItem().getMaxCount()) return false;
         return true;
     }
 

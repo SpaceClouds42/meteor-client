@@ -108,7 +108,7 @@ public class AutoReplenish extends Module {
 
     @Override
     public void onActivate() {
-        lastSlot = mc.player.inventory.selectedSlot;
+        lastSlot = mc.player.getInventory().selectedSlot;
     }
 
     @Override
@@ -129,23 +129,23 @@ public class AutoReplenish extends Module {
 
         // Hotbar, stackable items
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.inventory.getStack(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(stack.getItem());
-            if(result.slot < i && i != mc.player.inventory.selectedSlot) continue;
+            if(result.slot < i && i != mc.player.getInventory().selectedSlot) continue;
             if(isUnstackable(stack.getItem()) || stack.getItem() == Items.AIR) continue;
             if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
                 int slot = -1;
                 if (searchHotbar.get()) {
                     for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j)) && mc.player.inventory.selectedSlot != j && i != j) {
+                        if (mc.player.getInventory().getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.getInventory().getStack(j)) && mc.player.getInventory().selectedSlot != j && i != j) {
                             slot = j;
                             break;
                         }
                     }
                 }
                 if (slot == -1) {
-                    for (int j = 9; j < mc.player.inventory.main.size(); j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j))) {
+                    for (int j = 9; j < mc.player.getInventory().main.size(); j++) {
+                        if (mc.player.getInventory().getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.getInventory().getStack(j))) {
                             slot = j;
                             break;
                         }
@@ -163,15 +163,15 @@ public class AutoReplenish extends Module {
             if(stack.getItem() != Items.AIR) {
                 if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
                     int slot = -1;
-                    for (int i = 9; i < mc.player.inventory.main.size(); i++) {
-                        if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
+                    for (int i = 9; i < mc.player.getInventory().main.size(); i++) {
+                        if (mc.player.getInventory().getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.getInventory().getStack(i))) {
                             slot = i;
                             break;
                         }
                     }
                     if (searchHotbar.get() && slot == -1) {
                         for (int i = 0; i < 9; i++) {
-                            if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
+                            if (mc.player.getInventory().getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.getInventory().getStack(i))) {
                                 slot = i;
                                 break;
                             }
@@ -187,12 +187,12 @@ public class AutoReplenish extends Module {
         // MainHand, unstackable items
         if (unstackable.get()) {
             ItemStack mainHandItemStack = mc.player.getMainHandStack();
-            if (mainHandItemStack.getItem() != lastMainHand && !excludedItems.get().contains(lastMainHand) && mainHandItemStack.isEmpty() && (lastMainHand != null && lastMainHand != Items.AIR) && isUnstackable(lastMainHand) && mc.player.inventory.selectedSlot == lastSlot) {
+            if (mainHandItemStack.getItem() != lastMainHand && !excludedItems.get().contains(lastMainHand) && mainHandItemStack.isEmpty() && (lastMainHand != null && lastMainHand != Items.AIR) && isUnstackable(lastMainHand) && mc.player.getInventory().selectedSlot == lastSlot) {
                 int slot = findSlot(lastMainHand, lastSlot);
                 if (slot != -1) moveItems(slot, lastSlot, false);
             }
             lastMainHand = mc.player.getMainHandStack().getItem();
-            lastSlot = mc.player.inventory.selectedSlot;
+            lastSlot = mc.player.getInventory().selectedSlot;
 
             if (offhand.get()) {
                 // OffHand, unstackable items
@@ -237,8 +237,8 @@ public class AutoReplenish extends Module {
     private int findItems(Item item, int excludeSlot) {
         int slot = -1;
 
-        for (int i = searchHotbar.get() ? 0 : 9; i < mc.player.inventory.main.size(); i++) {
-            if (i != excludeSlot && mc.player.inventory.main.get(i).getItem() == item && (!searchHotbar.get() || i != mc.player.inventory.selectedSlot)) {
+        for (int i = searchHotbar.get() ? 0 : 9; i < mc.player.getInventory().main.size(); i++) {
+            if (i != excludeSlot && mc.player.getInventory().main.get(i).getItem() == item && (!searchHotbar.get() || i != mc.player.getInventory().selectedSlot)) {
                 slot = i;
                 return slot;
             }

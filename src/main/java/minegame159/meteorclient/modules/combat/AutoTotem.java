@@ -126,7 +126,7 @@ public class AutoTotem extends Module {
         assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
         List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if(mc.player.getInventory().getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
             slots.add(result.slot);
         }
         slots.add(InvUtils.OFFHAND_SLOT);

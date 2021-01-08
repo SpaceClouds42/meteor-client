@@ -52,10 +52,10 @@ public class AutoNametag extends Module {
 
             boolean findNametag = true;
             boolean offHand = false;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof NameTagItem) {
+            if (mc.player.getInventory().getMainHandStack().getItem() instanceof NameTagItem) {
                 findNametag = false;
             }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof NameTagItem) {
+            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof NameTagItem) {
                 findNametag = false;
                 offHand = true;
             }
@@ -63,9 +63,9 @@ public class AutoNametag extends Module {
             boolean foundNametag = !findNametag;
             if (findNametag) {
                 for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = mc.player.inventory.getStack(i);
+                    ItemStack itemStack = mc.player.getInventory().getStack(i);
                     if (itemStack.getItem() instanceof NameTagItem) {
-                        mc.player.inventory.selectedSlot = i;
+                        mc.player.getInventory().selectedSlot = i;
                         foundNametag = true;
                         break;
                     }

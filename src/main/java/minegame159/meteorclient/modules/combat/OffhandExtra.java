@@ -225,7 +225,7 @@ public class OffhandExtra extends Module {
         assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
         List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if(mc.player.getInventory().getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
             slots.add(slot);
         }
         slots.add(InvUtils.OFFHAND_SLOT);
@@ -235,8 +235,8 @@ public class OffhandExtra extends Module {
 
     private int findSlot(Item item){
         assert mc.player != null;
-        for (int i = 9; i < mc.player.inventory.size(); i++){
-            if (mc.player.inventory.getStack(i).getItem() == item){
+        for (int i = 9; i < mc.player.getInventory().size(); i++){
+            if (mc.player.getInventory().getStack(i).getItem() == item){
                 return i;
             }
         }

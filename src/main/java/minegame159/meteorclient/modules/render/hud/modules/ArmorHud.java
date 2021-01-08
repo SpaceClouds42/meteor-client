@@ -82,6 +82,6 @@ public class ArmorHud extends HudModule {
                 case 3:  return Items.DIAMOND_HELMET.getDefaultStack();
             }
         }
-        return mc.player.inventory.getArmorStack(i);
+        return mc.player.getInventory().getArmorStack(i);
     }
 }

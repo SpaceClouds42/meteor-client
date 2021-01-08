@@ -44,12 +44,12 @@ public class Drop extends Command {
                     }
                 })))
                 .then(literal("inventory").executes(context -> drop(player -> {
-                    for (int i = 9; i < player.inventory.main.size(); i++) {
+                    for (int i = 9; i < player.getInventory().main.size(); i++) {
                         InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                     }
                 })))
                 .then(literal("all").executes(context -> drop(player -> {
-                    for (int i = 0; i < player.inventory.main.size(); i++) {
+                    for (int i = 0; i < player.getInventory().main.size(); i++) {
                         InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                     }
                 })))
@@ -58,8 +58,8 @@ public class Drop extends Command {
                     Item item = Registry.ITEM.get(new Identifier(itemName.toLowerCase()));
                     if (item == Items.AIR) throw NO_SUCH_ITEM.create(itemName);
 
-                    for (int i = 0; i < player.inventory.main.size(); i++) {
-                        ItemStack itemStack = player.inventory.main.get(i);
+                    for (int i = 0; i < player.getInventory().main.size(); i++) {
+                        ItemStack itemStack = player.getInventory().main.get(i);
                         if (itemStack.getItem() == item)
                             InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                     }

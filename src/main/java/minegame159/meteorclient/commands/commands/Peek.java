@@ -44,7 +44,7 @@ public class Peek extends Command {
             else throw NOT_HOLDING_SHULKER_BOX.create();
 
             Utils.getItemsInContainerItem(itemStack, ITEMS);
-            MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, player.inventory, new SimpleInventory(ITEMS)), player.inventory, itemStack.getName());
+            MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, player.getInventory(), new SimpleInventory(ITEMS)), player.getInventory(), itemStack.getName());
 
             return SINGLE_SUCCESS;
         });

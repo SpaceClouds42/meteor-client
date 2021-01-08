@@ -90,7 +90,7 @@ public class HoleFiller extends Module {
 
     private int findSlot() {
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             switch (mode.get()) {
                 case Obsidian:

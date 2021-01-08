@@ -124,7 +124,7 @@ public class AutoMountBypassDupe extends Module {
             } else {
                 int slot = InvUtils.findItemWithCount(Items.CHEST).slot;
                 if (slot != -1 && slot < 9) {
-                    mc.player.inventory.selectedSlot  = slot;
+                    mc.player.getInventory().selectedSlot  = slot;
                  } else {
                     Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
                     this.toggle();

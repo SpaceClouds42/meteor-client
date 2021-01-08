@@ -65,7 +65,7 @@ public class AutoCity extends Module {
 
             int pickSlot = -1;
             for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
+                Item item = mc.player.getInventory().getStack(i).getItem();
 
                 if (item == Items.DIAMOND_PICKAXE || item == Items.NETHERITE_PICKAXE) {
                     pickSlot = i;
@@ -81,7 +81,7 @@ public class AutoCity extends Module {
 
             int obbySlot = -1;
             for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
+                Item item = mc.player.getInventory().getStack(i).getItem();
 
                 if (item == Items.OBSIDIAN) {
                     obbySlot = i;
@@ -93,7 +93,7 @@ public class AutoCity extends Module {
                 PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
             } else if (support.get() && obbySlot == -1) if (chatInfo.get()) Chat.warning(this, "No obsidian found for support, mining anyway.");
 
-            mc.player.inventory.selectedSlot = pickSlot;
+            mc.player.getInventory().selectedSlot = pickSlot;
 
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, mineTarget, Direction.UP));
             mc.player.swingHand(Hand.MAIN_HAND);

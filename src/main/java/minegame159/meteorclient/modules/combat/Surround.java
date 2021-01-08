@@ -158,15 +158,15 @@ public class Surround extends Module {
     }
 
     private boolean findSlot() {
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
 
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (!(item instanceof BlockItem)) continue;
 
             if (item == Items.OBSIDIAN) {
-                mc.player.inventory.selectedSlot = i;
+                mc.player.getInventory().selectedSlot = i;
                 return true;
             }
         }
@@ -175,6 +175,6 @@ public class Surround extends Module {
     }
 
     private void resetSlot() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        mc.player.getInventory().selectedSlot = prevSlot;
     }
 }

@@ -66,15 +66,15 @@ public class SelfTrap extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         int obsidianSlot = -1;
         for(int i = 0; i < 9; i++){
-            if (mc.player.inventory.getStack(i).getItem() == Blocks.OBSIDIAN.asItem()){
+            if (mc.player.getInventory().getStack(i).getItem() == Blocks.OBSIDIAN.asItem()){
                 obsidianSlot = i;
                 break;
             }
         }
         if (obsidianSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = obsidianSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
+        mc.player.getInventory().selectedSlot = obsidianSlot;
         BlockPos targetPosUp = mc.player.getBlockPos().up();
         BlockPos targetPos = mc.player.getBlockPos();
 
@@ -142,7 +142,7 @@ public class SelfTrap extends Module {
                 break;
             case None:
         }
-        mc.player.inventory.selectedSlot = prevSlot;
+        mc.player.getInventory().selectedSlot = prevSlot;
         if (turnOff.get()) toggle();
     });
 }

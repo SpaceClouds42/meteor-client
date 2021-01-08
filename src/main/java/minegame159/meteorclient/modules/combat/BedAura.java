@@ -242,15 +242,15 @@ public class BedAura extends Module {
                     && !(mc.player.getOffHandStack().getItem() instanceof BedItem)){
                 if (autoMove.get()){
                     for (int i = 0; i < 9; i++) {
-                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
+                        if (mc.player.getInventory().getStack(i).getItem() instanceof BedItem) {
                             doMove = false;
                             break;
                         }
                     }
                     if (doMove){
                         int slot = -1;
-                        for (int i = 0; i < mc.player.inventory.main.size(); i++){
-                            ItemStack itemStack = mc.player.inventory.main.get(i);
+                        for (int i = 0; i < mc.player.getInventory().main.size(); i++){
+                            ItemStack itemStack = mc.player.getInventory().main.get(i);
                             if (itemStack.getItem() instanceof BedItem){
                                 slot = i;
                             }
@@ -262,9 +262,9 @@ public class BedAura extends Module {
                 }
                 if (autoSwitch.get()){
                     for (int i = 0; i < 9; i++) {
-                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                            preSlot = mc.player.inventory.selectedSlot;
-                            mc.player.inventory.selectedSlot = i;
+                        if (mc.player.getInventory().getStack(i).getItem() instanceof BedItem) {
+                            preSlot = mc.player.getInventory().selectedSlot;
+                            mc.player.getInventory().selectedSlot = i;
                             break;
                         }
                     }
@@ -350,8 +350,8 @@ public class BedAura extends Module {
         lastDamage = bestDamage;
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlockPos, false));
         mc.player.swingHand(Hand.MAIN_HAND);
-        if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
-            mc.player.inventory.selectedSlot = preSlot;
+        if (preSlot != -1 && mc.player.getInventory().selectedSlot != preSlot && switchBack.get()) {
+            mc.player.getInventory().selectedSlot = preSlot;
         }
     }
 

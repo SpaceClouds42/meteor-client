@@ -82,7 +82,7 @@ public class AntiBed extends Module {
             place --;
         }
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             Item item = itemStack.getItem();
             Block block = Block.getBlockFromItem(item);
             if (item == Items.STRING
@@ -91,7 +91,7 @@ public class AntiBed extends Module {
                 place(i);
                 return;
             } else if (block instanceof SlabBlock) {
-                mc.player.inventory.selectedSlot = i;
+                mc.player.getInventory().selectedSlot = i;
                 ((IKeyBinding)mc.options.keySneak).setPressed(true);
                 if (place == -1) place = 2;
                 return;
@@ -140,13 +140,13 @@ public class AntiBed extends Module {
                 if (item instanceof SignItem) closeScreen = true;
                 return;
             } else if (item == Items.SCAFFOLDING && itemStack.getCount() >= 2) {
-                int preSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = i;
+                int preSlot = mc.player.getInventory().selectedSlot;
+                mc.player.getInventory().selectedSlot = i;
                 boolean sneaking = mc.player.isSneaking();
                 mc.player.setSneaking(true);
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.isOnGround()));
                 mc.player.setSneaking(sneaking);
-                mc.player.inventory.selectedSlot = preSlot;
+                mc.player.getInventory().selectedSlot = preSlot;
                 place(i);
                 return;
             }
@@ -168,13 +168,13 @@ public class AntiBed extends Module {
     }
 
     private void place(int i){
-        int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = i;
+        int preSlot = mc.player.getInventory().selectedSlot;
+        mc.player.getInventory().selectedSlot = i;
         boolean sneaking = mc.player.isSneaking();
         mc.player.setSneaking(true);
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
         mc.player.setSneaking(sneaking);
-        mc.player.inventory.selectedSlot = preSlot;
+        mc.player.getInventory().selectedSlot = preSlot;
         if (selfToggle.get()) this.toggle();
     }
 }

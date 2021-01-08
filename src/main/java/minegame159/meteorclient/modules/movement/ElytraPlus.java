@@ -226,11 +226,11 @@ public class ElytraPlus extends Module {
             fireworkTimer--;
         }
         if (replace.get()) {
-            if (mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA) {
-                if (mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()) {
+            if (mc.player.getInventory().getArmorStack(2).getItem() == Items.ELYTRA) {
+                if (mc.player.getInventory().getArmorStack(2).getMaxDamage() - mc.player.getInventory().getArmorStack(2).getDamage() <= replaceDurability.get()) {
                     int slot = -1;
                     for (int i = 9; i < 45; i++) {
-                        ItemStack stack = mc.player.inventory.getStack(i);
+                        ItemStack stack = mc.player.getInventory().getStack(i);
                         if (stack.getItem() == Items.ELYTRA && stack.getMaxDamage() - stack.getDamage() > replaceDurability.get()) {
                             slot = i;
                         }
@@ -243,7 +243,7 @@ public class ElytraPlus extends Module {
                 }
             }
         }
-        if (mode.get() == Mode.Packet && mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA && mc.player.fallDistance > 0.2 && !mc.options.keySneak.isPressed()) {
+        if (mode.get() == Mode.Packet && mc.player.getInventory().getArmorStack(2).getItem() == Items.ELYTRA && mc.player.fallDistance > 0.2 && !mc.options.keySneak.isPressed()) {
             Vec3d vec3d = new Vec3d(0, 0, 0);
 
             if (mc.options.keyForward.isPressed()) {
@@ -273,7 +273,7 @@ public class ElytraPlus extends Module {
             if (mc.player.getY() < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
                 int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
                 if (slot != -1) {
-                    mc.player.inventory.selectedSlot = slot;
+                    mc.player.getInventory().selectedSlot = slot;
                     Utils.rightClick();
 
                     decrementFireworkTimer = true;

@@ -98,7 +98,7 @@ public class AutoEat extends Module {
         if (isEating) {
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             isEating = false;
-            if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
+            if (preSelectedSlot != -1) mc.player.getInventory().selectedSlot = preSelectedSlot;
             if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
         }
     }
@@ -112,7 +112,7 @@ public class AutoEat extends Module {
         int bestHunger = -1;
 
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
             if (!item.isFood()) continue;
             if (noBad.get()) {
                 if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
@@ -157,14 +157,14 @@ public class AutoEat extends Module {
                     ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
-                if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (preSelectedSlot != -1) mc.player.getInventory().selectedSlot = preSelectedSlot;
                 if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
 
                 return;
             }
 
             if(slot != InvUtils.OFFHAND_SLOT) {
-                mc.player.inventory.selectedSlot = slot;
+                mc.player.getInventory().selectedSlot = slot;
             }
 
             if (!mc.player.isUsingItem()) {
@@ -190,9 +190,9 @@ public class AutoEat extends Module {
         }
 
         if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && autoHunger.get()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && autoHunger.get())) {
-            preSelectedSlot = mc.player.inventory.selectedSlot;
+            preSelectedSlot = mc.player.getInventory().selectedSlot;
             if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
-                mc.player.inventory.selectedSlot = slot;
+                mc.player.getInventory().selectedSlot = slot;
             }
             isEating = true;
             preFoodLevel = mc.player.getHungerManager().getFoodLevel();

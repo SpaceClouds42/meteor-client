@@ -53,7 +53,7 @@ public class InventoryViewerHud extends HudModule {
         if (mc.player != null) {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
-                    RenderUtils.drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18), hud.invViewerScale(), true);
+                    RenderUtils.drawItem(mc.player.getInventory().getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18), hud.invViewerScale(), true);
                 }
             }
         }

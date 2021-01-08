@@ -53,7 +53,7 @@ public class AutoWeb extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         int webSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.COBWEB) {
                 webSlot = i;
@@ -90,8 +90,8 @@ public class AutoWeb extends Module {
         }
 
         if (target != null) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = webSlot;
+            int prevSlot = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = webSlot;
             BlockPos targetPos = target.getBlockPos();
             int swung = 0;
             if (mc.world.getBlockState(targetPos).isAir()) {
@@ -103,7 +103,7 @@ public class AutoWeb extends Module {
                 swung++;
             }
             if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = prevSlot;
+            mc.player.getInventory().selectedSlot = prevSlot;
         }
     });
 }

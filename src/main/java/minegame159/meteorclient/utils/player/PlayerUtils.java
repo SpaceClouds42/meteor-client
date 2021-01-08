@@ -36,12 +36,12 @@ public class PlayerUtils {
         assert mc.player != null;
         if (slot == -1) return false;
 
-        int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        int preSlot = mc.player.getInventory().selectedSlot;
+        mc.player.getInventory().selectedSlot = slot;
 
         boolean a = placeBlock(blockPos, hand, true);
 
-        mc.player.inventory.selectedSlot = preSlot;
+        mc.player.getInventory().selectedSlot = preSlot;
         return a;
     }
 

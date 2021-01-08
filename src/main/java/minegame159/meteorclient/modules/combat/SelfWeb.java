@@ -53,7 +53,7 @@ public class SelfWeb extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         int webSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.COBWEB) {
                 webSlot = i;
@@ -62,8 +62,8 @@ public class SelfWeb extends Module {
         }
         if (webSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = webSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
+        mc.player.getInventory().selectedSlot = webSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
         if (rotate.get()) {
@@ -73,7 +73,7 @@ public class SelfWeb extends Module {
 
         if (doubles.get()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos.add(0 ,1,0), true));
 
-        mc.player.inventory.selectedSlot = prevSlot;
+        mc.player.getInventory().selectedSlot = prevSlot;
         if (turnOff.get()) toggle();
     });
 }

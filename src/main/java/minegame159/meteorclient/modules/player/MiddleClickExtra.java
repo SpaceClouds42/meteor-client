@@ -70,10 +70,10 @@ public class MiddleClickExtra extends Module {
             case Pearl: {
                 result = InvUtils.findItemWithCount(Items.ENDER_PEARL);
                 if (result.slot <= 8 && result.slot != -1) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = result.slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                    mc.player.inventory.selectedSlot = preSlot;
+                    mc.player.getInventory().selectedSlot = preSlot;
                 } else if (notify.get()) {
                     Chat.error(this, "Unable to find specified item.");
                 }
@@ -81,8 +81,8 @@ public class MiddleClickExtra extends Module {
             }case Gap: {
                 result = InvUtils.findItemWithCount(Items.GOLDEN_APPLE);
                 if (result.slot <= 8 && result.slot != -1) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = result.slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = result.slot;
                     preCount = result.count;
                     ((IKeyBinding) mc.options.keyUse).setPressed(true);
                     wasUsing = true;
@@ -93,8 +93,8 @@ public class MiddleClickExtra extends Module {
             }case EGap:{
                 result = InvUtils.findItemWithCount(Items.ENCHANTED_GOLDEN_APPLE);
                 if (result.slot <= 8 && result.slot != -1) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = result.slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = result.slot;
                     preCount = result.count;
                     ((IKeyBinding) mc.options.keyUse).setPressed(true);
                     wasUsing = true;
@@ -105,8 +105,8 @@ public class MiddleClickExtra extends Module {
             }case Bow:{
                 result = InvUtils.findItemWithCount(Items.BOW);
                 if (result.slot <= 8 && result.slot != -1) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = result.slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = result.slot;
                     result = InvUtils.findItemWithCount(Items.ARROW);
                     preCount = result.count;
                     wasUsing = true;
@@ -117,8 +117,8 @@ public class MiddleClickExtra extends Module {
             }case Rod: {
                 result = InvUtils.findItemWithCount(Items.FISHING_ROD);
                 if (result.slot <= 8 && result.slot != -1) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = result.slot;
+                    preSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                 } else if (notify.get()) {
                     Chat.error(this, "Unable to find specified item.");
@@ -134,7 +134,7 @@ public class MiddleClickExtra extends Module {
         if(preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item
                 && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
-            mc.player.inventory.selectedSlot = preSlot;
+            mc.player.getInventory().selectedSlot = preSlot;
             wasUsing = false;
         } else {
             ((IKeyBinding) mc.options.keyUse).setPressed(true);

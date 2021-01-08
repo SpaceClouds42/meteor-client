@@ -152,15 +152,15 @@ public class AutoTrap extends Module {
         placePositions = getPlacePos(target);
 
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            int prevSlot = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = slot;
 
             if (PlayerUtils.placeBlockRotate(placePositions.get(placePositions.size()-1))) {
                 placePositions.remove(placePositions.get(placePositions.size() - 1));
                 placed = true;
             }
 
-            mc.player.inventory.selectedSlot = prevSlot;
+            mc.player.getInventory().selectedSlot = prevSlot;
             delay = 0;
         } else delay++;
     });

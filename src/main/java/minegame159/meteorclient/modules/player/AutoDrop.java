@@ -47,8 +47,8 @@ public class AutoDrop extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?>) return;
 
-        for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {
-            if (items.get().contains(mc.player.inventory.getStack(i).getItem())) {
+        for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().size(); i++) {
+            if (items.get().contains(mc.player.getInventory().getStack(i).getItem())) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
             }
         }

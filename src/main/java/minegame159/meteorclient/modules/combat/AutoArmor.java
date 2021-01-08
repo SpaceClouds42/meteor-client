@@ -180,7 +180,7 @@ public class AutoArmor extends Module {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
+        if (mc.currentScreen != null && mc.player.getInventory().size() < 44) return;
         if (mc.player.abilities.creativeMode) return;
         if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
@@ -201,7 +201,7 @@ public class AutoArmor extends Module {
         }
         ItemStack itemStack;
         for (int a = 0; a < 4; a++) {
-            itemStack = mc.player.inventory.getArmorStack(a);
+            itemStack = mc.player.getInventory().getArmorStack(a);
             currentBest = 0;
             currentProt = 0;
             currentBlast = 0;
@@ -222,7 +222,7 @@ public class AutoArmor extends Module {
             int bestSlot = -1;
             int bestScore = 0;
             for (int i = 0; i < 36; i++) {
-                ItemStack stack = mc.player.inventory.getStack(i);
+                ItemStack stack = mc.player.getInventory().getStack(i);
                 if (stack.getItem() instanceof ArmorItem
                         && (((ArmorItem) stack.getItem()).getSlotType().getEntitySlotId() == a)) {
                     int temp = getItemScore(stack);

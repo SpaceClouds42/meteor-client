@@ -377,7 +377,7 @@ public class CrystalAura extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+        if (preSlot != -1) mc.player.getInventory().selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
@@ -513,8 +513,8 @@ public class CrystalAura extends Module {
                     if (placeDelayLeft <= 0) placeDelayLeft = 10;
                 }
             }
-            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
-                mc.player.inventory.selectedSlot = preSlot;
+            if (spoofChange.get() && preSlot != mc.player.getInventory().selectedSlot && preSlot != -1)
+                mc.player.getInventory().selectedSlot = preSlot;
         }
     }, EventPriority.HIGH);
 
@@ -606,11 +606,11 @@ public class CrystalAura extends Module {
         assert mc.player != null;
         assert mc.world != null;
         assert mc.interactionManager != null;
-        int preSlot = mc.player.inventory.selectedSlot;
+        int preSlot = mc.player.getInventory().selectedSlot;
         if (mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()) {
             for (int i = 0; i < 9; i++) {
-                if (mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem) {
-                    mc.player.inventory.selectedSlot = i;
+                if (mc.player.getInventory().getStack(i).getItem() instanceof SwordItem || mc.player.getInventory().getStack(i).getItem() instanceof AxeItem) {
+                    mc.player.getInventory().selectedSlot = i;
                     break;
                 }
             }
@@ -620,7 +620,7 @@ public class CrystalAura extends Module {
         mc.interactionManager.attackEntity(mc.player, entity);
         mc.world.removeEntity(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
-        mc.player.inventory.selectedSlot = preSlot;
+        mc.player.getInventory().selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
             locked = false;
@@ -651,8 +651,8 @@ public class CrystalAura extends Module {
         if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
             int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
             if (slot != -1 && slot < 9) {
-                preSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = slot;
+                preSlot = mc.player.getInventory().selectedSlot;
+                mc.player.getInventory().selectedSlot = slot;
             }
         }
     }
@@ -710,7 +710,7 @@ public class CrystalAura extends Module {
         crystalList.clear();
         if (support.get()){
             for (int i = 0; i < 9; i++){
-                if (mc.player.inventory.getStack(i).getItem() == Items.OBSIDIAN){
+                if (mc.player.getInventory().getStack(i).getItem() == Items.OBSIDIAN){
                     canSupport = true;
                     supportSlot = i;
                     break;

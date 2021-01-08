@@ -112,38 +112,38 @@ public class AutoGap extends Module {
                     ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
-                mc.player.inventory.selectedSlot = prevSlot;
+                mc.player.getInventory().selectedSlot = prevSlot;
             }
         } else {
             if(mode.get() == Mode.Fire_Resistance && mc.player.getActiveStatusEffects().containsKey(StatusEffects.FIRE_RESISTANCE)) return;
             int gappleSlot = -1;
             int egapSlot = -1;
             for(int i = 0; i < 9; i++){
-                if(mc.player.inventory.getStack(i).getItem() == Items.GOLDEN_APPLE && gappleSlot == -1){
+                if(mc.player.getInventory().getStack(i).getItem() == Items.GOLDEN_APPLE && gappleSlot == -1){
                     gappleSlot = i;
-                }else if(mc.player.inventory.getStack(i).getItem() == Items.ENCHANTED_GOLDEN_APPLE && egapSlot == -1){
+                }else if(mc.player.getInventory().getStack(i).getItem() == Items.ENCHANTED_GOLDEN_APPLE && egapSlot == -1){
                     egapSlot = i;
                 }
             }
             if (wasThis) {
                 if ((mode.get() == Mode.Fire_Resistance || preferEgap.get()) && egapSlot != -1) {
-                    mc.player.inventory.selectedSlot = egapSlot;
+                    mc.player.getInventory().selectedSlot = egapSlot;
                 } else if (gappleSlot != -1) {
-                    mc.player.inventory.selectedSlot = gappleSlot;
+                    mc.player.getInventory().selectedSlot = gappleSlot;
                 } else if (egapSlot != -1) {
-                    mc.player.inventory.selectedSlot = egapSlot;
+                    mc.player.getInventory().selectedSlot = egapSlot;
                 }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
             } else {
                 if ((mode.get() == Mode.Fire_Resistance || preferEgap.get()) && egapSlot != -1) {
-                    prevSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = egapSlot;
+                    prevSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = egapSlot;
                 } else if (gappleSlot != -1) {
-                    prevSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = gappleSlot;
+                    prevSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = gappleSlot;
                 } else if (egapSlot != -1) {
-                    prevSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = egapSlot;
+                    prevSlot = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = egapSlot;
                 }
                 if (disableAuras.get()) {
                     if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {

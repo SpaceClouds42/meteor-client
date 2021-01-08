@@ -99,17 +99,17 @@ public class AutoTool extends Module {
             int slot = -1;
             int score = 0;
             for(int i = 0; i < 36; i++){
-                if ((mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) <= 11) continue;
-                if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                if ((mc.player.getInventory().getStack(i).getMaxDamage() - mc.player.getInventory().getStack(i).getDamage()) <= 11) continue;
+                if(material.get() == materialPreference.None && mc.player.getInventory().getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
                     slot = i;
                     break;
-                }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
+                }else if(material.get() == materialPreference.Same && mc.player.getInventory().getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
                     slot = i;
                     break;
                 }else if(material.get() == materialPreference.Best && blockState != null){
-                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
-                        if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
-                            score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
+                    if(mc.player.getInventory().getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                        if(score < Math.round(mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(blockState))){
+                            score = Math.round(mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(blockState));
                             slot = i;
                         }
                     }
@@ -117,24 +117,24 @@ public class AutoTool extends Module {
             }
             if(slot == -1 && material.get() != materialPreference.None){
                 for(int i = 0; i < 36; i++){
-                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
-                            && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
+                    if(mc.player.getInventory().getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
+                            && (mc.player.getInventory().getStack(i).getMaxDamage() - mc.player.getInventory().getStack(i).getDamage()) > 11){
                         slot = i;
                         break;
                     }
                 }
             }
             if(slot != -1){
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-            }else if(mc.player.inventory.getEmptySlot() != -1){
-                int emptySlot = mc.player.inventory.getEmptySlot();
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().selectedSlot), 0, SlotActionType.PICKUP);
+            }else if(mc.player.getInventory().getEmptySlot() != -1){
+                int emptySlot = mc.player.getInventory().getEmptySlot();
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(emptySlot), 0, SlotActionType.PICKUP);
             }else {
-                if (mc.player.inventory.selectedSlot < 8) mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot + 1;
-                else mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot - 1;
+                if (mc.player.getInventory().selectedSlot < 8) mc.player.getInventory().selectedSlot = mc.player.getInventory().selectedSlot + 1;
+                else mc.player.getInventory().selectedSlot = mc.player.getInventory().selectedSlot - 1;
             }
         }
     });
@@ -148,7 +148,7 @@ public class AutoTool extends Module {
         if (blockState.getHardness(mc.world, event.blockPos) < 0) return;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (!isEffectiveOn(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
             int score = 0;
 
@@ -168,7 +168,7 @@ public class AutoTool extends Module {
         }
 
         if (bestSlot != -1) {
-            mc.player.inventory.selectedSlot = bestSlot;
+            mc.player.getInventory().selectedSlot = bestSlot;
         }
     }, EventPriority.HIGH);
 

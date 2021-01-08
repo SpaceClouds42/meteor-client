@@ -46,7 +46,7 @@ public class EXPThrower extends Module {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
+            if (mc.player.getInventory().getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
                 slot = i;
                 break;
             }
@@ -56,10 +56,10 @@ public class EXPThrower extends Module {
             if (lookDown.get()) {
                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
             }
-            int preSelectedSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            int preSelectedSlot = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = slot;
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = preSelectedSlot;
+            mc.player.getInventory().selectedSlot = preSelectedSlot;
         }
 
         if(autoToggle.get()) {
@@ -67,8 +67,8 @@ public class EXPThrower extends Module {
             int set = 0;
 
             for(int i = 0; i < 4; i++) {
-                if(!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
-                if(!mc.player.inventory.armor.get(i).isDamaged()) count++;
+                if(!mc.player.getInventory().armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getInventory().getArmorStack(i)) == 1) set++;
+                if(!mc.player.getInventory().armor.get(i).isDamaged()) count++;
             }
             if(count == set && set != 0) toggle();
         }

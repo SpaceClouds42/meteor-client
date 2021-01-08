@@ -50,11 +50,11 @@ public class AutoShearer extends Module {
 
             boolean findNewShears = false;
             boolean offHand = false;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
-                if (preserveBrokenShears.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
+            if (mc.player.getInventory().getMainHandStack().getItem() instanceof ShearsItem) {
+                if (preserveBrokenShears.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1) findNewShears = true;
             }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
-                if (preserveBrokenShears.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
+            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof ShearsItem) {
+                if (preserveBrokenShears.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1) findNewShears = true;
                 else offHand = true;
             }
             else {
@@ -66,7 +66,7 @@ public class AutoShearer extends Module {
                 int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!preserveBrokenShears.get() || (preserveBrokenShears.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
 
                 if (slot != -1) {
-                    mc.player.inventory.selectedSlot = slot;
+                    mc.player.getInventory().selectedSlot = slot;
                     foundShears = true;
                 }
             }

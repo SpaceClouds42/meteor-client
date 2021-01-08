@@ -13,6 +13,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -28,7 +29,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         resetCapeMovement();
         setHealth(health);
 
-        if (copyInv) inventory.clone(mc.player.inventory);
+        if (copyInv) this.getInventory().clone(mc.player.getInventory());
         if (glowing) setGlowing(true);
 
         spawn();

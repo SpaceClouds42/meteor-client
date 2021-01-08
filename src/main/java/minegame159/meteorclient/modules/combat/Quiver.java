@@ -83,7 +83,7 @@ public class Quiver extends Module {
     public void onActivate() {
         shooting = false;
         int arrowsToShoot = 0;
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
 
         shotStrength = false;
         shotSpeed = false;
@@ -102,7 +102,7 @@ public class Quiver extends Module {
             if (chatInfo.get()) Chat.error(this, "No bow found… disabling.");
             toggle();
             return;
-        } else mc.player.inventory.selectedSlot = bowSlot;
+        } else mc.player.getInventory().selectedSlot = bowSlot;
 
         for (Map.Entry<ArrowType, Integer> slot : getAllArrows().entrySet()) {
             if (slot.getKey() == ArrowType.Strength && !foundStrength) {
@@ -132,7 +132,7 @@ public class Quiver extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        mc.player.getInventory().selectedSlot = prevSlot;
     }
 
     @EventHandler
@@ -194,7 +194,7 @@ public class Quiver extends Module {
         boolean hasSpeed = mc.player.getActiveStatusEffects().containsKey(StatusEffects.SPEED);
 
         for (int i = 35; i >= 0; i--) {
-            if (mc.player.inventory.getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.inventory.selectedSlot) continue;
+            if (mc.player.getInventory().getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.getInventory().selectedSlot) continue;
 
             if (checkEffects.get()) {
                 if (isType("effect.minecraft.strength", i) && !hasStrength)  arrowSlotMap.put(ArrowType.Strength, i);
@@ -210,7 +210,7 @@ public class Quiver extends Module {
 
     private boolean isType(String type, int slot) {
         assert mc.player != null;
-        ItemStack stack = mc.player.inventory.getStack(slot);
+        ItemStack stack = mc.player.getInventory().getStack(slot);
         if (stack.getItem() == Items.TIPPED_ARROW) {
             List<StatusEffectInstance> effects = PotionUtil.getPotion(stack).getEffects();
             if (effects.size() > 0) {
@@ -235,7 +235,7 @@ public class Quiver extends Module {
         int slot = -1;
         assert mc.player != null;
 
-        for (int i = 0; i < 9; i++) if (mc.player.inventory.getStack(i).getItem() == Items.BOW) slot = i;
+        for (int i = 0; i < 9; i++) if (mc.player.getInventory().getStack(i).getItem() == Items.BOW) slot = i;
 
         return slot;
     }

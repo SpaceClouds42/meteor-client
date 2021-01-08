@@ -113,14 +113,14 @@ public class Auto32K extends Module {
                 if(sortedIterator.hasNext()) bestBlock = sortedIterator.next();
 
                 if (bestBlock != null) {
-                    mc.player.inventory.selectedSlot = hopperSlot;
+                    mc.player.getInventory().selectedSlot = hopperSlot;
                     while (!PlayerUtils.placeBlock(bestBlock, Hand.MAIN_HAND)) {
                         if(sortedIterator.hasNext()) {
                             bestBlock = sortedIterator.next().up();
                         }else break;
                     }
                     mc.player.setSneaking(true);
-                    mc.player.inventory.selectedSlot = shulkerSlot;
+                    mc.player.getInventory().selectedSlot = shulkerSlot;
                     if (!PlayerUtils.placeBlock(bestBlock.up(), Hand.MAIN_HAND)) {
                         Utils.sendMessage("#redFailed to place.");
                         this.toggle();
@@ -139,7 +139,7 @@ public class Auto32K extends Module {
                     return;
                 if (phase == 0) {
                     bestBlock = findValidBlocksDispenser();
-                    mc.player.inventory.selectedSlot = hopperSlot;
+                    mc.player.getInventory().selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
                     if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z), Hand.MAIN_HAND)) {
                         Utils.sendMessage("#redFailed to place.");
@@ -148,7 +148,7 @@ public class Auto32K extends Module {
                     }
                     phase += 1;
                 } else if (phase == 1) {
-                    mc.player.inventory.selectedSlot = dispenserSlot;
+                    mc.player.getInventory().selectedSlot = dispenserSlot;
                     if (x == -1) {
                         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
                     } else if (x == 1) {
@@ -174,7 +174,7 @@ public class Auto32K extends Module {
                     mc.player.closeHandledScreen();
                     phase += 1;
                 }else if (phase == 6) {
-                    mc.player.inventory.selectedSlot = redstoneSlot;
+                    mc.player.getInventory().selectedSlot = redstoneSlot;
                     mc.player.setSneaking(true);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
                     mc.player.setSneaking(false);
@@ -192,7 +192,7 @@ public class Auto32K extends Module {
                     Iterator<Block> blocks = throwawayItems.get().iterator();
                     for (Item item = blocks.next().asItem(); blocks.hasNext(); item = blocks.next().asItem()) {
                         for (int i = 5; i <= 40; i++) {
-                            ItemStack stack = mc.player.inventory.getStack(i);
+                            ItemStack stack = mc.player.getInventory().getStack(i);
                             if (stack.getItem() == item && stack.getCount() >= 4) {
                                 slot = i;
                                 count = stack.getCount();
@@ -224,7 +224,7 @@ public class Auto32K extends Module {
                 }
                 if (dropSlot != -1) InvUtils.clickSlot(InvUtils.invIndexToSlotId(dropSlot), 0, SlotActionType.THROW);
                 if(autoMove.get() && manage){
-                    int slot2 = mc.player.inventory.getEmptySlot();
+                    int slot2 = mc.player.getInventory().getEmptySlot();
                     if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) > 5) {
                         InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
                         InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2) - 4, 0, SlotActionType.PICKUP);
@@ -234,7 +234,7 @@ public class Auto32K extends Module {
                     }
                 }
                 if(slot != -1) {
-                    mc.player.inventory.selectedSlot = slot - 32;
+                    mc.player.getInventory().selectedSlot = slot - 32;
                 }
             }else this.toggle();
         }

@@ -143,11 +143,11 @@ public class BookBot extends Module {
             InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
             // If it's in their hotbar then just switch to it (no need to switch back later)
             if (itemResult.slot <= 8 && itemResult.slot != -1) {
-                mc.player.inventory.selectedSlot = itemResult.slot;
+                mc.player.getInventory().selectedSlot = itemResult.slot;
                 ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
             } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
             } else { // Otherwise we are out and we can just wait for more books.
                 // I'm always waiting. Watching. Get more books. I dare you. :))))
@@ -264,7 +264,7 @@ public class BookBot extends Module {
         mc.player.getMainHandStack().putSubTag("pages", pages);
         mc.player.getMainHandStack().putSubTag("author", StringTag.of("squidoodly"));
         mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.getInventory().selectedSlot));
         booksLeft--;
     }
 

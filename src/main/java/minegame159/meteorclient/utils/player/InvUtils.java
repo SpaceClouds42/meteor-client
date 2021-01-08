@@ -53,8 +53,8 @@ public class InvUtils implements Listenable {
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
-        for (int i = 0; i < mc.player.inventory.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (itemStack.getItem() == item) {
                 if (!findItemResult.found()) findItemResult.slot = i;
@@ -67,8 +67,8 @@ public class InvUtils implements Listenable {
 
     public static int findItem(Item item, Predicate<ItemStack> isGood) {
         assert mc.player != null;
-        for (int i = 0; i < mc.player.inventory.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
 
@@ -78,7 +78,7 @@ public class InvUtils implements Listenable {
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
         assert mc.player != null;
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
 

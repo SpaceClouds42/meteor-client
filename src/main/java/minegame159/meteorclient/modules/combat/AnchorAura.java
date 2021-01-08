@@ -271,9 +271,9 @@ public class AnchorAura extends Module {
         glowSlot = -1;
         anchorSlot = -1;
         for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getStack(i).getItem() == Items.GLOWSTONE) {
+            if (mc.player.getInventory().getStack(i).getItem() == Items.GLOWSTONE) {
                 glowSlot = i;
-            } else if (mc.player.inventory.getStack(i).getItem() == Items.RESPAWN_ANCHOR) {
+            } else if (mc.player.getInventory().getStack(i).getItem() == Items.RESPAWN_ANCHOR) {
                 anchorSlot = i;
             }
         }
@@ -287,13 +287,13 @@ public class AnchorAura extends Module {
         if (glowSlot != -1 && nonGlowSlot != -1) {
             mc.player.setSneaking(false);
             ((IKeyBinding) mc.options.keySneak).setPressed(false);
-            int preSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = glowSlot;
+            int preSlot = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = glowSlot;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vecPos, Direction.UP, pos, false));
-            mc.player.inventory.selectedSlot = nonGlowSlot;
+            mc.player.getInventory().selectedSlot = nonGlowSlot;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vecPos, Direction.UP, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = preSlot;
+            mc.player.getInventory().selectedSlot = preSlot;
         }
     }
 

@@ -105,7 +105,7 @@ public class AutoAnvil extends Module {
 
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.ANVIL || item == Items.CHIPPED_ANVIL || item == Items.DAMAGED_ANVIL) {
                 anvilSlot = i;
@@ -116,7 +116,7 @@ public class AutoAnvil extends Module {
 
         int buttonSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
                 buttonSlot = i;
@@ -128,10 +128,10 @@ public class AutoAnvil extends Module {
 
 
         if (target != null) {
-            int prevSlot = mc.player.inventory.selectedSlot;
+            int prevSlot = mc.player.getInventory().selectedSlot;
 
             if (placeButton.get()) {
-                mc.player.inventory.selectedSlot = buttonSlot;
+                mc.player.getInventory().selectedSlot = buttonSlot;
                 BlockPos targetPos = target.getBlockPos();
                 if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, target.getBlockPos(), true));
@@ -139,12 +139,12 @@ public class AutoAnvil extends Module {
                 }
             }
 
-            mc.player.inventory.selectedSlot = anvilSlot;
+            mc.player.getInventory().selectedSlot = anvilSlot;
             BlockPos targetPos = target.getBlockPos().up();
 
             PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0), Hand.MAIN_HAND);
 
-            mc.player.inventory.selectedSlot = prevSlot;
+            mc.player.getInventory().selectedSlot = prevSlot;
         }
     });
 }

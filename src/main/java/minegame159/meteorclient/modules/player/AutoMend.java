@@ -57,8 +57,8 @@ public class AutoMend extends Module {
     }
 
     private void replaceItem(boolean offhandEmpty) {
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
             if (!swords.get() && itemStack.getItem() instanceof SwordItem) continue;
 
@@ -68,9 +68,9 @@ public class AutoMend extends Module {
 
             break;
         }
-        if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+        if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.getInventory().getEmptySlot() != -1){
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().getEmptySlot()), 0, SlotActionType.PICKUP);
         }
     }
 
@@ -84,10 +84,10 @@ public class AutoMend extends Module {
     }
 
     private void replaceArmour(int slot, boolean empty){
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if(!(itemStack.getItem() instanceof ArmorItem)) continue;
-            if(!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
+            if(!checkSlot(mc.player.getInventory().getStack(i), slot)) continue;
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
 
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
@@ -96,9 +96,9 @@ public class AutoMend extends Module {
 
             break;
         }
-        if(!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+        if(!mc.player.getInventory().getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.getInventory().getEmptySlot() != -1){
             InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.getInventory().getEmptySlot()), 0, SlotActionType.PICKUP);
         }
     }
 
@@ -116,9 +116,9 @@ public class AutoMend extends Module {
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {
-                if (mc.player.inventory.getStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
-                else if (!mc.player.inventory.getStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
-                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
+                if (mc.player.getInventory().getStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
+                else if (!mc.player.getInventory().getStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
+                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getInventory().getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
             }
         }
     });

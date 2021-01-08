@@ -83,7 +83,7 @@ public class LiquidFiller extends Module {
         int slot = -1;
 
         for (int i = 0; i < 9; i++){
-            ItemStack block = mc.player.inventory.getStack(i);
+            ItemStack block = mc.player.getInventory().getStack(i);
             if ((block.getItem() instanceof BlockItem) && whitelist.get().contains(Block.getBlockFromItem(block.getItem()))) {
                 slot = i;
                 break;

@@ -40,7 +40,7 @@ public class SelfAnvil extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.ANVIL || item == Items.CHIPPED_ANVIL || item == Items.DAMAGED_ANVIL) {
                 anvilSlot = i;
@@ -49,9 +49,9 @@ public class SelfAnvil extends Module {
         }
         if (anvilSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
 
-        mc.player.inventory.selectedSlot = anvilSlot;
+        mc.player.getInventory().selectedSlot = anvilSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
         PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
@@ -60,7 +60,7 @@ public class SelfAnvil extends Module {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
         }
 
-        mc.player.inventory.selectedSlot = prevSlot;
+        mc.player.getInventory().selectedSlot = prevSlot;
         toggle();
     });
 

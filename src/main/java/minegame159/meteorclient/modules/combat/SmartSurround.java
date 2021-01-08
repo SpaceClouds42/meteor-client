@@ -75,11 +75,11 @@ public class SmartSurround extends Module {
                 }
 
                 for (int i = 0; i < 9; i++) {
-                    Item item = mc.player.inventory.getStack(i).getItem();
+                    Item item = mc.player.getInventory().getStack(i).getItem();
 
                     if (item instanceof BlockItem) {
                         slot = i;
-                        mc.player.inventory.selectedSlot = slot;
+                        mc.player.getInventory().selectedSlot = slot;
                         break;
                     }
                 }
@@ -122,7 +122,7 @@ public class SmartSurround extends Module {
 
             if (mc.world.raycast(new RaycastContext(mc.player.getPos(), crystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() != HitResult.Type.MISS) {
                 slot = -1;
-                mc.player.inventory.selectedSlot = oldSlot;
+                mc.player.getInventory().selectedSlot = oldSlot;
             }
         }
     });
@@ -132,15 +132,15 @@ public class SmartSurround extends Module {
     }
 
     private int findObiInHotbar() {
-        oldSlot = mc.player.inventory.selectedSlot;
+        oldSlot = mc.player.getInventory().selectedSlot;
         int newSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
 
             if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
                 newSlot = i;
-                mc.player.inventory.selectedSlot = newSlot;
+                mc.player.getInventory().selectedSlot = newSlot;
                 break;
             }
         }

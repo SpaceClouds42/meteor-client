@@ -103,8 +103,8 @@ public class Scaffold extends Module {
         if (slot == -1) return;
 
         // Change slot
-        prevSelectedSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        prevSelectedSlot = mc.player.getInventory().selectedSlot;
+        mc.player.getInventory().selectedSlot = slot;
 
         PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND);
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
@@ -147,7 +147,7 @@ public class Scaffold extends Module {
         }
 
         // Change back to previous slot
-        mc.player.inventory.selectedSlot = prevSelectedSlot;
+        mc.player.getInventory().selectedSlot = prevSelectedSlot;
     });
 
     @EventHandler
@@ -161,10 +161,10 @@ public class Scaffold extends Module {
     });
 
     private boolean findBlock() {
-        if (mc.player.inventory.getStack(slot).isEmpty()) {
+        if (mc.player.getInventory().getStack(slot).isEmpty()) {
             slot = findSlot(blockState);
             if (slot == -1) {
-                mc.player.inventory.selectedSlot = prevSelectedSlot;
+                mc.player.getInventory().selectedSlot = prevSelectedSlot;
                 if (selfToggle.get()) this.toggle();
                 return false;
             }
@@ -188,7 +188,7 @@ public class Scaffold extends Module {
     private int findSlot(BlockState blockState) {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.inventory.getStack(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
 
             if (blackList.get().contains(Block.getBlockFromItem(stack.getItem()))) continue;
@@ -217,7 +217,7 @@ public class Scaffold extends Module {
 
         // Filter out blocks that would fall
         if (block instanceof FallingBlock && FallingBlock.canFallThrough(blockState)) return slot;
-        slot = mc.player.inventory.selectedSlot;
+        slot = mc.player.getInventory().selectedSlot;
 
         return slot;
     }
