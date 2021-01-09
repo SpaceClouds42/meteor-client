@@ -149,7 +149,7 @@ public class AutoTool extends Module {
 
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
-            if (!isEffectiveOn(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
+            if (!isSuitableFor(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
             int score = 0;
 
             if (enderChestOnlyWithSilkTouch.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
@@ -172,8 +172,8 @@ public class AutoTool extends Module {
         }
     }, EventPriority.HIGH);
 
-    public boolean isEffectiveOn(Item item, BlockState blockState) {
-        if (item.isEffectiveOn(blockState)) return true;
+    public boolean isSuitableFor(Item item, BlockState blockState) {
+        if (item.isSuitableFor(blockState)) return true;
 
         Set<Material> effectiveMaterials;
         Set<Block> effectiveBlocks;

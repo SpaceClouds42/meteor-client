@@ -85,7 +85,7 @@ public class EChestFarmer extends Module {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.getInventory().getStack(i).getItem(), ENDER_CHEST)
+                if (ModuleManager.INSTANCE.get(AutoTool.class).isSuitableFor(mc.player.getInventory().getStack(i).getItem(), ENDER_CHEST)
                         && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.getInventory().getStack(i)) == 0) {
                     slot = i;
                 }

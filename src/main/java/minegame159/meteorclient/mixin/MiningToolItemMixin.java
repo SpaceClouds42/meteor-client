@@ -19,7 +19,7 @@ public class MiningToolItemMixin implements IMiningToolItem {
     @Shadow @Final private Set<Block> effectiveBlocks;
 
     @Override
-    public boolean isEffectiveOn(Block block) {
+    public boolean isSuitableFor(Block block) {
         return effectiveBlocks.contains(block);
     }
 }
