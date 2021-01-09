@@ -54,7 +54,7 @@ public class PacketUtils {
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class, "PlayerSpawnPositionS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket.class, "ChunkLoadDistanceS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket.class, "ChunkRenderDistanceCenterS2CPacket");
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.HeldItemChangeS2CPacket.class, "HeldItemChangeS2CPacket");
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket.class, "UpdateSelectedSlotS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SetCameraEntityS2CPacket.class, "SetCameraEntityS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket.class, "WorldBorderS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SelectAdvancementTabS2CPacket.class, "SelectAdvancementTabS2CPacket");
@@ -204,7 +204,7 @@ public class PacketUtils {
         S2C_PACKETS_R.put("PlayerSpawnPositionS2CPacket", net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class);
         S2C_PACKETS_R.put("ChunkLoadDistanceS2CPacket", net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket.class);
         S2C_PACKETS_R.put("ChunkRenderDistanceCenterS2CPacket", net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket.class);
-        S2C_PACKETS_R.put("HeldItemChangeS2CPacket", net.minecraft.network.packet.s2c.play.HeldItemChangeS2CPacket.class);
+        S2C_PACKETS_R.put("UpdateSelectedSlotS2CPacket", net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket.class);
         S2C_PACKETS_R.put("SetCameraEntityS2CPacket", net.minecraft.network.packet.s2c.play.SetCameraEntityS2CPacket.class);
         S2C_PACKETS_R.put("WorldBorderS2CPacket", net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket.class);
         S2C_PACKETS_R.put("SelectAdvancementTabS2CPacket", net.minecraft.network.packet.s2c.play.SelectAdvancementTabS2CPacket.class);
