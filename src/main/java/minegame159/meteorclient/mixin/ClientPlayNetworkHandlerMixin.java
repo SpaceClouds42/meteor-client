@@ -65,7 +65,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(EventStore.containerSlotUpdateEvent(packet));
     }
 
-    @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(ILnet/minecraft/entity/Entity$RemovalReason;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onEntityDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo info, int i, int j) {
         MeteorClient.EVENT_BUS.post(EventStore.entityDestroyEvent(client.world.getEntityById(j)));
     }
