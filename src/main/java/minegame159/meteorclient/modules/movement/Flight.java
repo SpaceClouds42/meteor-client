@@ -55,19 +55,19 @@ public class Flight extends Module {
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.abilities.flying = true;
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = true;
+            mc.player.getAbilities().flying = true;
+            if (mc.player.getAbilities().creativeMode) return;
+            mc.player.getAbilities().allowFlying = true;
         }
     }
 
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.abilities.flying = false;
-            mc.player.abilities.setFlySpeed(0.05f);
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = false;
+            mc.player.getAbilities().flying = false;
+            mc.player.getAbilities().setFlySpeed(0.05f);
+            if (mc.player.getAbilities().creativeMode) return;
+            mc.player.getAbilities().allowFlying = false;
         }
     }
 
@@ -91,15 +91,15 @@ public class Flight extends Module {
         }
 
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.abilities.setFlySpeed(speed.get().floatValue());
-            mc.player.abilities.flying = true;
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = true;
+            mc.player.getAbilities().setFlySpeed(speed.get().floatValue());
+            mc.player.getAbilities().flying = true;
+            if (mc.player.getAbilities().creativeMode) return;
+            mc.player.getAbilities().allowFlying = true;
         } else if (mode.get() == Mode.Velocity) {
             // TODO: deal with underwater movement, find a way to "spoof" not being in water
             // also, all of the multiplication below is to get the speed to roughly match the speed
             // you get when using vanilla fly
-            mc.player.abilities.flying = false;
+            mc.player.getAbilities().flying = false;
             mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
 
             mc.player.setVelocity(0, 0, 0);

@@ -105,7 +105,7 @@ public class AutoEat extends Module {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
         if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
         slot = -1;

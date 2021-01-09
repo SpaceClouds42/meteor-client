@@ -44,7 +44,7 @@ public class EndermanLook extends Module {
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (lookMode.get() == Mode.LookAway) {
-            if (mc.player.abilities.creativeMode || !shouldLook())
+            if (mc.player.getAbilities().creativeMode || !shouldLook())
                 return;
 
             PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(

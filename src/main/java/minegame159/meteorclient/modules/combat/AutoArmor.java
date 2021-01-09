@@ -182,7 +182,7 @@ public class AutoArmor extends Module {
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null && mc.player.getInventory().size() < 44) return;
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
         if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
             mode.set(Prot.Blast_Protection);
