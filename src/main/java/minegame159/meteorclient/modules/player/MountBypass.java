@@ -15,6 +15,8 @@ import minegame159.meteorclient.modules.misc.AutoMountBypassDupe;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 
+import java.util.Objects;
+
 public class MountBypass extends Module {
     private boolean dontCancel;
 
@@ -38,8 +40,11 @@ public class MountBypass extends Module {
         if (!(event.packet instanceof PlayerInteractEntityC2SPacket)) return;
         PlayerInteractEntityC2SPacket packet = (PlayerInteractEntityC2SPacket) event.packet;
 
-        if (packet.getType() == PlayerInteractEntityC2SPacket.InteractionType.INTERACT_AT && packet.getEntity(mc.world) instanceof AbstractDonkeyEntity) {
-            event.cancel();
+        if (packet.getType() == PlayerInteractEntityC2SPacket.InteractionType.INTERACT_AT) {
+            assert mc.player != null;
+            if (packet.getEntity(Objects.requireNonNull(Objects.requireNonNull(mc.getServer()).getWorld(mc.player.world.getRegistryKey())).toServerWorld()) instanceof AbstractDonkeyEntity) {
+                event.cancel();
+            }
         }
     }
 
