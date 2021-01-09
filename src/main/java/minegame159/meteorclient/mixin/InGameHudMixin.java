@@ -16,6 +16,7 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,8 +64,8 @@ public abstract class InGameHudMixin {
         if (ModuleManager.INSTANCE.get(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
-    @Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderPumpkinOverlay(CallbackInfo info) {
+    @Inject(method = "renderOverlay", at = @At("HEAD"), cancellable = true)
+    private void onRenderPumpkinOverlay(Identifier texture, float opacity, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noPumpkinOverlay()) info.cancel();
     }
 
