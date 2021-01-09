@@ -16,7 +16,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
-import minegame159.meteorclient.utils.world.IWorld;
+import minegame159.meteorclient.mixininterface.IWorld;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;

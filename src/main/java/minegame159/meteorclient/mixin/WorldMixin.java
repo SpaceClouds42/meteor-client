@@ -1,6 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.utils.world.IWorld;
+import minegame159.meteorclient.mixininterface.IWorld;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.BlockEntityTickInvoker;
