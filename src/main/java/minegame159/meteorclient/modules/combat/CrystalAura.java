@@ -26,6 +26,7 @@ import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -618,7 +619,7 @@ public class CrystalAura extends Module {
 
         RotationUtils.packetRotate(entity);
         mc.interactionManager.attackEntity(mc.player, entity);
-        mc.world.removeEntity(entity.getId());
+        mc.world.removeEntity(entity.getId(), RemovalReason.KILLED);
         if (!noSwing.get()) mc.player.swingHand(getHand());
         mc.player.getInventory().selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
