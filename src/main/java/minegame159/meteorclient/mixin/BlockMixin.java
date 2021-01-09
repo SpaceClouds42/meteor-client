@@ -27,7 +27,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
     }
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
-    private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
+    private static void onShouldDrawSide(BlockState state, BlockView world, BlockPos pos, Direction side, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         DrawSideEvent event = MeteorClient.postEvent(EventStore.drawSideEvent(state));
         if (event.isSet()) info.setReturnValue(event.getDraw());
     }
