@@ -257,7 +257,7 @@ public class AutoArmor extends Module {
         score += 2 * (EnchantmentHelper.getLevel(Enchantments.FIRE_PROTECTION, itemStack) - currentFire);
         score += 2 * (EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack) - currentProj);
         score += 2 * (((ArmorItem) itemStack.getItem()).getProtection() - currentArmour);
-        score += 2 * (((ArmorItem) itemStack.getItem()).method_26353() - currentToughness);
+        score += 2 * (((ArmorItem) itemStack.getItem()).getToughness() - currentToughness);
         score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack) - currentUnbreaking;
         if (preferMending.get() && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) - currentMending) > 0) score += weight.get();
         return score;
@@ -270,7 +270,7 @@ public class AutoArmor extends Module {
         currentFire = EnchantmentHelper.getLevel(Enchantments.FIRE_PROTECTION, itemStack);
         currentProj = EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack);
         currentArmour = ((ArmorItem) itemStack.getItem()).getProtection();
-        currentToughness = ((ArmorItem) itemStack.getItem()).method_26353();
+        currentToughness = ((ArmorItem) itemStack.getItem()).getToughness();
         currentUnbreaking = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
         currentMending = EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
     }
