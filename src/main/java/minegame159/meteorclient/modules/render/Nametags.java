@@ -231,7 +231,7 @@ public class Nametags extends Module {
         if (displayArmor.get() || displayArmorEnchants.get()) {
             MeteorClient.FONT_2X.scale = 0.5 * enchantTextScale.get();
             for (int i = 0; i < 4; i++) {
-                ItemStack itemStack = entity.inventory.armor.get(i);
+                ItemStack itemStack = entity.getInventory().armor.get(i);
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                 Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
                 for (Enchantment enchantment : displayedEnchantments.get()) {
@@ -289,7 +289,7 @@ public class Nametags extends Module {
             boolean isDamaged = false;
 
             for (int i = 0; i < 4; i++) {
-                ItemStack itemStack = entity.inventory.armor.get(i);
+                ItemStack itemStack = entity.getInventory().armor.get(i);
 
                 if (itemStack.isDamaged()) isDamaged = true;
 
@@ -326,7 +326,7 @@ public class Nametags extends Module {
                 MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
                 for (int i = 0; i < 4; i++) {
-                    ItemStack itemStack = entity.inventory.armor.get(i);
+                    ItemStack itemStack = entity.getInventory().armor.get(i);
 
                     double damage = Math.max(0, itemStack.getDamage());
                     double maxDamage = itemStack.getMaxDamage();
@@ -374,7 +374,7 @@ public class Nametags extends Module {
             MeteorClient.FONT_2X.scale = 0.5 * enchantTextScale.get();
 
             for (int i = 0; i < 4; i++) {
-                ItemStack itemStack = entity.inventory.armor.get(i);
+                ItemStack itemStack = entity.getInventory().armor.get(i);
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                 Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
                 for (Enchantment enchantment : displayedEnchantments.get()) {

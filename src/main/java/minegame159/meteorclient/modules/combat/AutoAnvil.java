@@ -98,7 +98,7 @@ public class AutoAnvil extends Module {
             }
         }
 
-        if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
+        if (isActive() && toggleOnBreak.get() && target != null && target.getInventory().getArmorStack(3).isEmpty()) {
             Chat.info(this, "Target head slot is empty… Disabling.");
             toggle();
         }
