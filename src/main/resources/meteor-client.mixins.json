@@ -93,6 +93,7 @@
     "TextVisitFactoryMixin",
     "TitleScreenMixin",
     "Vec3dMixin",
+    "WorldMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"
   ],
