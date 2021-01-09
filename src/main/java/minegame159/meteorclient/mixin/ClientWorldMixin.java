@@ -25,9 +25,10 @@ public class ClientWorldMixin {
         MeteorClient.EVENT_BUS.post(EventStore.entityAddedEvent(entity));
     }
 
-    @Inject(method = "finishRemovingEntity", at = @At("TAIL"))
-    private void onFinishRemovingEntity(Entity entity, CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(EventStore.entityRemovedEvent(entity));
+    @Inject(method = "removeEntity", at = @At("TAIL"))
+    private void onFinishRemovingEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo info) {
+        ClientWorld clientWorld = (ClientWorld) (Object) this;
+        MeteorClient.EVENT_BUS.post(EventStore.entityRemovedEvent(clientWorld.getEntityById(entityId)));
     }
 
     @Inject(method = "setBlockStateWithoutNeighborUpdates", at = @At("TAIL"))
