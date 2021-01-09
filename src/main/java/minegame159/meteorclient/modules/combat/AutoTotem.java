@@ -25,6 +25,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.Dimension;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -135,6 +136,7 @@ public class AutoTotem extends Module {
     }
 
     private double getHealthReduction(){
+        System.out.println("AutoTotem.getHealthReduction()");
         assert mc.world != null;
         assert mc.player != null;
         double damageTaken = 0;
@@ -155,13 +157,15 @@ public class AutoTotem extends Module {
                 damageTaken = damage;
             }
         }
-        if (Utils.getDimension() != Dimension.Nether) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
+        if (!mc.world.getDimension().isBedWorking()) {
+            for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
+                System.out.println(blockEntity.getType() + " at " + blockEntity.getPos());
                 if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))) {
                     damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()));
                 }
             }
         }
+
         return damageTaken;
     }
 

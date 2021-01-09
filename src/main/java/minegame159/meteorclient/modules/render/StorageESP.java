@@ -16,6 +16,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
@@ -120,7 +121,7 @@ public class StorageESP extends Module {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
 
-        for (BlockEntity blockEntity : mc.world.blockEntities) {
+        for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
             if (blockEntity.isRemoved()) continue;
 
             getTileEntityColor(blockEntity);

@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -148,7 +149,7 @@ public class Tracers extends Module {
         }
 
         if (storage.get()) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
+            for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
                 if (blockEntity.isRemoved()) continue;
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {

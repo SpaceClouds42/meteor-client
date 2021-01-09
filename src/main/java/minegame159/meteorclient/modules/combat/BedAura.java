@@ -21,6 +21,7 @@ import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -220,13 +221,13 @@ public class BedAura extends Module {
             return;
         }
         try {
-            for (BlockEntity entity : mc.world.blockEntities) {
-                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
-                    currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
+            for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
+                if (blockEntity instanceof BedBlockEntity && Utils.distance(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
+                    currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(blockEntity.getPos()));
                     if (currentDamage < maxDamage.get()
                             || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.Suicide)) {
                         mc.player.setSneaking(false);
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockEntity.getPos(), false));
                     }
 
                 }

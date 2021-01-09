@@ -17,6 +17,7 @@ import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -281,7 +282,7 @@ public class AutoArmor extends Module {
             }
         }
         if (!mc.world.getDimension().isBedWorking()) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
+            for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
                 BlockPos pos = blockEntity.getPos();
                 if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > boomDamage.get()) {
                     return true;

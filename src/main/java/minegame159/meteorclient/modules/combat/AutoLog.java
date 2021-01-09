@@ -21,6 +21,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.world.Dimension;
+import minegame159.meteorclient.utils.world.IWorld;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -160,7 +161,7 @@ public class AutoLog extends Module {
             }
         }
         if (Utils.getDimension() != Dimension.Overworld) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
+            for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
                 BlockPos bp = blockEntity.getPos();
                 Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 

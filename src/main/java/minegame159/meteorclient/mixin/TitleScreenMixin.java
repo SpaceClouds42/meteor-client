@@ -29,6 +29,8 @@ public class TitleScreenMixin extends Screen {
     private int text2Color;
     private int text3Color;
     private int text4Color;
+    private int text5Color;
+    private int text6Color;
 
     private String text1;
     private int text1Length;
@@ -42,6 +44,12 @@ public class TitleScreenMixin extends Screen {
     private String text4;
     private int text4Length;
 
+    private String text5;
+    private int text5Length;
+
+    private String text6;
+    private int text6Length;
+
     public TitleScreenMixin(Text title) {
         super(title);
     }
@@ -52,16 +60,22 @@ public class TitleScreenMixin extends Screen {
         text2Color = Color.fromRGBA(175, 175, 175, 255);
         text3Color = Color.fromRGBA(255, 255, 255, 255);
         text4Color = Color.fromRGBA(175, 175, 175, 255);
+        text5Color = Color.fromRGBA(255, 255, 255, 255);
+        text6Color = Color.fromRGBA(175, 175, 175, 255);
 
         text1 = "Meteor Client by ";
         text2 = "MineGame159";
         text3 = " & ";
         text4 = "squidoodly";
+        text5 = "Ported to 20w51a by ";
+        text6 = "SpaceClouds42";
 
         text1Length = textRenderer.getWidth(text1);
         text2Length = textRenderer.getWidth(text2);
         text3Length = textRenderer.getWidth(text3);
         text4Length = textRenderer.getWidth(text4);
+        text5Length = textRenderer.getWidth(text5);
+        text6Length = textRenderer.getWidth(text6);
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawStringWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V", ordinal = 0))
@@ -83,5 +97,7 @@ public class TitleScreenMixin extends Screen {
         textRenderer.drawWithShadow(matrices, text2, width - text4Length - text3Length - text2Length - 3, 3, text2Color);
         textRenderer.drawWithShadow(matrices, text3, width - text4Length - text3Length - 3, 3, text3Color);
         textRenderer.drawWithShadow(matrices, text4, width - text4Length - 3, 3, text4Color);
+        textRenderer.drawWithShadow(matrices, text5, width - text6Length - text5Length - 3, 9, text5Color);
+        textRenderer.drawWithShadow(matrices, text6, width - text6Length - 3, 9, text6Color);
     }
 }
