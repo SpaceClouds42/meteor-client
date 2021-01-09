@@ -122,8 +122,8 @@ public class Search extends Module {
 
     private void searchViewDistance() {
         int viewDist = mc.options.viewDistance;
-        for (int x = mc.player.chunkX - viewDist; x <= mc.player.chunkX + viewDist; x++) {
-            for (int z = mc.player.chunkZ - viewDist; z <= mc.player.chunkZ + viewDist; z++) {
+        for (int x = mc.player.getChunkPos().x - viewDist; x <= mc.player.getChunkPos().x + viewDist; x++) {
+            for (int z = mc.player.getChunkPos().z - viewDist; z <= mc.player.getChunkPos().z + viewDist; z++) {
                 if (mc.world.getChunkManager().isChunkLoaded(x, z)) searchChunk(mc.world.getChunk(x, z), null);
             }
         }
@@ -265,7 +265,8 @@ public class Search extends Module {
 
         public boolean shouldBeDeleted() {
             int viewDist = mc.options.viewDistance + 1;
-            return x > mc.player.chunkX + viewDist || x < mc.player.chunkX - viewDist || z > mc.player.chunkZ + viewDist || z < mc.player.chunkZ - viewDist;
+            assert mc.player != null;
+            return x > mc.player.getChunkPos().x + viewDist || x < mc.player.getChunkPos().x - viewDist || z > mc.player.getChunkPos().z + viewDist || z < mc.player.getChunkPos().z - viewDist;
         }
 
         public void update() {
