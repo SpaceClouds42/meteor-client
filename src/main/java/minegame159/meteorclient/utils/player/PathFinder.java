@@ -148,11 +148,11 @@ public class PathFinder {
     }
 
     public boolean isAir(Block block) {
-        return block.is(Blocks.AIR);
+        return block.equals(Blocks.AIR);
     }
 
     public boolean isWater(Block block) {
-        return block.is(Blocks.WATER);
+        return block.equals(Blocks.WATER);
     }
 
     public void lookAtDestination(PathBlock pathBlock) {
