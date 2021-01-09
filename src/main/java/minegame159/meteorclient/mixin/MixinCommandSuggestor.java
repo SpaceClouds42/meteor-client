@@ -38,7 +38,7 @@ public abstract class MixinCommandSuggestor {
     @Shadow private CommandSuggestor.SuggestionWindow window;
 
     @Inject(method = "refresh",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()V"),
+            at = @At(value = "INVOKE"),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
