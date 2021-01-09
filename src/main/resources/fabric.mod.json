@@ -26,8 +26,7 @@
     ]
   },
   "mixins": [
-    "meteor-client.mixins.json",
-    "meteor-client-sodium.mixins.json"
+    "meteor-client.mixins.json"
   ],
 
   "accessWidener": "meteor-client.accesswidener",
