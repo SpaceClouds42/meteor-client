@@ -98,6 +98,6 @@ public class TitleScreenMixin extends Screen {
         textRenderer.drawWithShadow(matrices, text3, width - text4Length - text3Length - 3, 3, text3Color);
         textRenderer.drawWithShadow(matrices, text4, width - text4Length - 3, 3, text4Color);
         textRenderer.drawWithShadow(matrices, text5, width - text6Length - text5Length - 3, 9, text5Color);
-        textRenderer.drawWithShadow(matrices, text6, width - text6Length - 3, 9, text6Color);
+        textRenderer.drawWithShadow(matrices, text6, width - text6Length - 3, 12, text6Color);
     }
 }
