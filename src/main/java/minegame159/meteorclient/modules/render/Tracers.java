@@ -150,6 +150,7 @@ public class Tracers extends Module {
 
         if (storage.get()) {
             for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
+                assert blockEntity != null;
                 if (blockEntity.isRemoved()) continue;
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {

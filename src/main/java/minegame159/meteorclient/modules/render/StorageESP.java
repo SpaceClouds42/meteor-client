@@ -122,6 +122,7 @@ public class StorageESP extends Module {
         count = 0;
 
         for (BlockEntity blockEntity : ((IWorld) mc.world).getBlockEntities()) {
+            assert blockEntity != null;
             if (blockEntity.isRemoved()) continue;
 
             getTileEntityColor(blockEntity);
