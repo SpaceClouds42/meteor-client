@@ -38,10 +38,12 @@ public abstract class MixinCommandSuggestor {
     @Shadow private CommandSuggestor.SuggestionWindow window;
 
     @Inject(method = "refresh",
-            at = @At(value = "INVOKE"),
+            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
+        //String string = textField.getText();
+        //StringReader reader = new StringReader(string);
         String prefix = Config.INSTANCE.getPrefix();
         int length = prefix.length();
         if (reader.canRead(length) && reader.getString().startsWith(prefix, reader.getCursor())) {
