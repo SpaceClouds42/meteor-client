@@ -11,7 +11,7 @@ public enum TopBarType {
     Gui(TopBarGui::new),
     Friends(TopBarFriends::new),
     Macros(TopBarMacros::new),
-    Baritone(TopBarBaritone::new),
+    // Baritone(TopBarBaritone::new),
     Waypoints(TopBarWaypoints::new);
 
     private interface TopBarScreenFactory {

@@ -25,7 +25,7 @@ public class CommandManager {
         addCommand(new Enchant());
         addCommand(new Reset());
         addCommand(new Panic());
-        addCommand(new Baritone());
+        // addCommand(new Baritone());
         addCommand(new Reload());
         addCommand(new Dismount());
         addCommand(new Say());
@@ -36,16 +36,16 @@ public class CommandManager {
         addCommand(new Friend());
         addCommand(new Peek());
         addCommand(new FakePlayerCommand());
-        addCommand(new SwarmCloseConnections());
-        addCommand(new SwarmEscape());
-        addCommand(new SwarmFollow());
-        addCommand(new SwarmGoto());
+        // addCommand(new SwarmCloseConnections());
+        // addCommand(new SwarmEscape());
+        // addCommand(new SwarmFollow());
+        // addCommand(new SwarmGoto());
         addCommand(new SwarmInfinityMiner());
         addCommand(new SwarmMine());
         addCommand(new SwarmRelease());
         addCommand(new SwarmSlave());
         addCommand(new SwarmStop());
-        addCommand(new SwarmScatter());
+        // addCommand(new SwarmScatter());
         addCommand(new SwarmModuleToggle());
         addCommand(new SwarmQueen());
     }

@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules.player;
 
-import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
@@ -87,7 +86,6 @@ public class AutoEat extends Module {
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
     private int slot;
-    private boolean wasThis = false;
 
     public AutoEat() {
         super(Category.Player, "auto-eat", "Automatically eats food.");
@@ -99,7 +97,6 @@ public class AutoEat extends Module {
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             isEating = false;
             if (preSelectedSlot != -1) mc.player.getInventory().selectedSlot = preSelectedSlot;
-            if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
         }
     }
 
@@ -158,7 +155,6 @@ public class AutoEat extends Module {
                     wasCrystalActive = false;
                 }
                 if (preSelectedSlot != -1) mc.player.getInventory().selectedSlot = preSelectedSlot;
-                if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
 
                 return;
             }
@@ -196,11 +192,6 @@ public class AutoEat extends Module {
             }
             isEating = true;
             preFoodLevel = mc.player.getHungerManager().getFoodLevel();
-
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                wasThis = true;
-            }
         }
     });
 

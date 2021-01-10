@@ -1,6 +1,5 @@
 package minegame159.meteorclient.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -26,7 +25,7 @@ import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -167,15 +166,10 @@ public class Swarm extends Module {
         currentMode = Mode.Idle;
         if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     public void mine() {
         Chat.info("Swarm: Starting mining job.");
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
         targetBlock = null;
 
     }
@@ -310,7 +304,7 @@ public class Swarm extends Module {
             }
         }
 
-        public synchronized void sendMessage(@Nonnull String s) {
+        public synchronized void sendMessage(@NotNull String s) {
             MeteorExecutor.execute(() -> {
                 try {
                     for (SubServer clientConnection : clientConnections) {
@@ -330,7 +324,7 @@ public class Swarm extends Module {
         final private Socket connection;
         private volatile String messageToSend;
 
-        public SubServer(@Nonnull Socket connection) {
+        public SubServer(@NotNull Socket connection) {
             this.connection = connection;
             start();
         }
@@ -365,7 +359,7 @@ public class Swarm extends Module {
         }
     }
 
-    public void execute(@Nonnull String s) {
+    public void execute(@NotNull String s) {
         try {
             CommandManager.dispatch(s);
         } catch (CommandSyntaxException ignored) {

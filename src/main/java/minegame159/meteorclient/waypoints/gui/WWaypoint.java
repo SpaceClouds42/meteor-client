@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.waypoints.gui;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.pathing.goals.GoalGetToBlock;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -46,10 +43,6 @@ public class WWaypoint extends WTable {
         WButton path = new WButton("Goto");
         path.action = () -> {
             if(MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
-            IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
-            if (baritone.getPathingBehavior().isPathing())
-                baritone.getPathingBehavior().cancelEverything();
-            baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(new BlockPos(waypoint.x, waypoint.y, waypoint.z)));
         };
         right.add(path);
     }
