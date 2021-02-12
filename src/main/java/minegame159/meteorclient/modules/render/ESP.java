@@ -1,35 +1,31 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ESP extends Module {
-    private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
+    //private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
     private static final MeshBuilder MB = new MeshBuilder(128);
 
     public enum Mode {
@@ -56,10 +52,10 @@ public class ESP extends Module {
             .build()
     );
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .build()
     );
 
@@ -71,6 +67,13 @@ public class ESP extends Module {
     );
 
     // Colors
+
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the ESP color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -165,17 +168,17 @@ public class ESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (isOutline()) return;
-
+    private void onRender(RenderEvent event) {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
+            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
+
+            if (mode.get() == Mode.Box) render(event, entity, getColor(entity));
             count++;
-            render(event, entity, getColor(entity));
         }
-    });
+    }
 
     @Override
     public String getInfoString() {
@@ -183,7 +186,7 @@ public class ESP extends Module {
     }
 
     public Color getOutlineColor(Entity entity) {
-        if (!entities.get().contains(entity.getType())) return null;
+        if (!entities.get().getBoolean(entity.getType())) return null;
         Color color = getColor(entity);
 
         double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
@@ -200,17 +203,7 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
-
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animalsColor.get();
-            case WATER_CREATURE: return waterAnimalsColor.get();
-            case MONSTER:        return monstersColor.get();
-            case AMBIENT:        return ambientColor.get();
-            case MISC:           return miscColor.get();
-        }
-
-        return Utils.WHITE;
+        return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
     }
 
     public boolean isOutline() {

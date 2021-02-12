@@ -1,13 +1,12 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -17,7 +16,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class AutoJump extends Module {
-    public enum JumpIf {
+    public enum JumpWhen {
         Sprinting,
         Walking,
         Always
@@ -25,7 +24,7 @@ public class AutoJump extends Module {
 
     public enum Mode {
         Jump,
-        Velocity
+        LowHop
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -37,19 +36,19 @@ public class AutoJump extends Module {
             .build()
     );
 
+    private final Setting<JumpWhen> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpWhen>()
+            .name("jump-if")
+            .description("Jump if.")
+            .defaultValue(JumpWhen.Always)
+            .build()
+    );
+
     private final Setting<Double> velocityHeight = sgGeneral.add(new DoubleSetting.Builder()
             .name("velocity-height")
             .description("The distance that velocity mode moves you.")
             .defaultValue(0.25)
             .min(0)
             .sliderMax(2)
-            .build()
-    );
-
-    private final Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
-            .name("jump-if")
-            .description("Jump if.")
-            .defaultValue(JumpIf.Always)
             .build()
     );
 
@@ -67,10 +66,10 @@ public class AutoJump extends Module {
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
 
         if (mode.get() == Mode.Jump) mc.player.jump();
         else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
-    });
+    }
 }

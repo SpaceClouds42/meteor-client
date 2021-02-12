@@ -1,17 +1,15 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.PacketBoolSetting;
@@ -49,13 +47,13 @@ public class PacketCanceller extends Module {
         super(Category.Misc, "packet-canceller", "Allows you to cancel certain packets.");
     }
 
-    @EventHandler
-    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onReceivePacket(PacketEvent.Receive event) {
         if (s2cPackets.get().getBoolean(event.packet.getClass())) event.cancel();
-    }, EventPriority.HIGHEST + 1);
+    }
 
-    @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onSendPacket(PacketEvent.Send event) {
         if (c2sPackets.get().getBoolean(event.packet.getClass())) event.cancel();
-    }, EventPriority.HIGHEST + 1);
+    }
 }

@@ -1,19 +1,18 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.utils.player.InvUtils;
-import net.minecraft.client.MinecraftClient;
+import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.misc.AutoSteal;
+import minegame159.meteorclient.utils.render.MeteorButtonWidget;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,28 +27,22 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     protected void init() {
         super.init();
 
-        // Steal
-        addButton(new ButtonWidget(x + width - 50 - 7, y + 3, 50, 12, new LiteralText("Steal"), button -> {
-            for (int i = 0; i < handler.getRows() * 9; i++) {
-                InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
-            }
+        AutoSteal autoSteal = Modules.get().get(AutoSteal.class);
 
-            boolean empty = true;
-            for (int i = 0; i < handler.getRows() * 9; i++) {
-                if (!handler.getSlot(i).getStack().isEmpty()) {
-                    empty = false;
-                    break;
-                }
-            }
+        if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
+            addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
+        if (autoSteal.isActive() && autoSteal.getDumpButtonEnabled())
+            addButton(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
 
-            if (empty) MinecraftClient.getInstance().player.closeHandledScreen();
-        }));
+        if (autoSteal.isActive() && autoSteal.getAutoStealEnabled()) steal(handler);
+        else if (autoSteal.isActive() && autoSteal.getAutoDumpEnabled()) dump(handler);
+    }
 
-        // Dump
-        addButton(new ButtonWidget(x + width - 50 - 7, y + this.height - 96 - 1, 50, 12, new LiteralText("Dump"), button -> {
-            for (int i = handler.getRows() * 9; i < handler.getRows() * 9 + 1 + 3 * 9; i++) {
-                InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
-            }
-        }));
+    private void steal(GenericContainerScreenHandler handler) {
+        Modules.get().get(AutoSteal.class).stealAsync(handler);
+    }
+
+    private void dump(GenericContainerScreenHandler handler) {
+        Modules.get().get(AutoSteal.class).dumpAsync(handler);
     }
 }

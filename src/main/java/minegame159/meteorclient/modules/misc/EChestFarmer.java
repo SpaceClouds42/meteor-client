@@ -1,18 +1,17 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 20/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AutoTool;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -71,7 +70,7 @@ public class EChestFarmer extends Module {
     private int numLeft = Math.floorDiv(amount.get() , 8);
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lowerAmount.get() < InvUtils.findItemWithCount(Items.OBSIDIAN).count) stop = false;
         if (stop && !disableOnAmount.get()) {
             stop = false;
@@ -85,7 +84,7 @@ public class EChestFarmer extends Module {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
+                if (Modules.get().get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
                         && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
                     slot = i;
                 }
@@ -110,5 +109,5 @@ public class EChestFarmer extends Module {
 
             }
         }
-    });
+    }
 }

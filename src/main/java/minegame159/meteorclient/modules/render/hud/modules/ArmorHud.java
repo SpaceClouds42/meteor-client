@@ -1,14 +1,15 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import net.minecraft.client.MinecraftClient;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -20,66 +21,89 @@ public class ArmorHud extends HudModule {
         Percentage
     }
 
+    public enum Orientation {
+        Horizontal,
+        Vertical
+    }
+
     public ArmorHud(HUD hud) {
         super(hud, "armor", "Displays information about your armor.");
     }
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(16 * hud.armorScale() * 4 + 2 * 4, 16 * hud.armorScale());
+        switch (hud.armorInfoOrientation.get()) {
+            case Horizontal:
+                box.setSize(16 * hud.armorInfoScale.get() * 4 + 2 * 4, 16 * hud.armorInfoScale.get());
+                break;
+            case Vertical:
+                box.setSize(16 * hud.armorInfoScale.get(), 16 * hud.armorInfoScale.get() * 4 + 2 * 4);
+        }
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         double x = box.getX();
         double y = box.getY();
+        double armorX;
+        double armorY;
 
-        int slot = hud.armorFlip() ? 3 : 0;
+        int slot = hud.armorInfoFlip.get() ? 3 : 0;
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
 
             RenderSystem.pushMatrix();
-            RenderSystem.scaled(hud.armorScale(), hud.armorScale(), 1);
-            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
+            RenderSystem.scaled(hud.armorInfoScale.get(), hud.armorInfoScale.get(), 1);
 
-            if (itemStack.isDamageable()) {
-                switch (hud.armorDurability()) {
-                    case Default: {
-                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
+            if (hud.armorInfoOrientation.get() == Orientation.Vertical) {
+                armorX = x / hud.armorInfoScale.get();
+                armorY = y / hud.armorInfoScale.get() + position * 18;
+            } else {
+                armorX = x / hud.armorInfoScale.get() + position * 18;
+                armorY = y / hud.armorInfoScale.get();
+            }
+
+            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, (itemStack.isDamageable() && hud.armorInfoDurability.get() == Durability.Default));
+
+            if (itemStack.isDamageable() && !(mc.currentScreen instanceof HudEditorScreen) && hud.armorInfoDurability.get() != Durability.Default && hud.armorInfoDurability.get() != Durability.None) {
+                String message = "err";
+
+                switch (hud.armorInfoDurability.get()) {
+                    case Numbers:
+                        message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         break;
-                    }
-                    case Numbers: {
-                        String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
+                    case Percentage:
+                        message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         break;
-                    }
-                    case Percentage: {
-                        String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                        double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
-                        break;
-                    }
                 }
+
+                double messageWidth = renderer.textWidth(message);
+
+                if (hud.armorInfoOrientation.get() == Orientation.Vertical) {
+                    armorX = x + 8 * hud.armorInfoScale.get() - messageWidth / 2.0;
+                    armorY = y + (18 * position * hud.armorInfoScale.get()) + (18 * hud.armorInfoScale.get() - renderer.textHeight());
+                } else {
+                    armorX = x + 18 * position * hud.armorInfoScale.get() + 8 * hud.armorInfoScale.get() - messageWidth / 2.0;
+                    armorY = y + (box.height - renderer.textHeight());
+                }
+
+                renderer.text(message, armorX, armorY, hud.primaryColor.get());
             }
 
             RenderSystem.popMatrix();
 
-            if (hud.armorFlip()) slot--;
+            if (hud.armorInfoFlip.get()) slot--;
             else slot++;
         }
     }
 
     private ItemStack getItem(int i) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.player == null) {
+        if (mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
             switch (i) {
-                default: return Items.DIAMOND_BOOTS.getDefaultStack();
-                case 1:  return Items.DIAMOND_LEGGINGS.getDefaultStack();
-                case 2:  return Items.DIAMOND_CHESTPLATE.getDefaultStack();
-                case 3:  return Items.DIAMOND_HELMET.getDefaultStack();
+                default: return Items.NETHERITE_BOOTS.getDefaultStack();
+                case 1:  return Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 2:  return Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3:  return Items.NETHERITE_HELMET.getDefaultStack();
             }
         }
         return mc.player.inventory.getArmorStack(i);

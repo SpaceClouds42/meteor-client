@@ -1,12 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -17,9 +16,9 @@ import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -65,7 +64,7 @@ public class Trajectories extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         Item item = mc.player.getMainHandStack().getItem();
         if (!Utils.isThrowable(item)) {
             item = mc.player.getOffHandStack().getItem();
@@ -82,9 +81,9 @@ public class Trajectories extends Module {
 
         if (hitQuad) {
             if (hitQuadHorizontal) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
-            else Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, sideColor.get(), lineColor.get(), shapeMode.get());
+            else Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
         }
-    });
+    }
 
     private void calculatePath(float tickDelta, Item item) {
         // Clear path and target

@@ -1,13 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -25,19 +25,28 @@ public class NoFall extends Module {
         Packet,
         AirPlace
     }
+
     public enum PlaceMode{
         BeforeDeath,
         BeforeDamage
     }
+
     public NoFall() {
         super(Category.Movement, "no-fall", "Prevents you from taking fall damage.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The way you are saved from fall damage.")
+            .defaultValue(Mode.Packet)
+            .build()
+    );
+
     private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
-            .name("elytra compatibility")
-            .description("Stops this from working when using elytra.")
+            .name("elytra-compatibility")
+            .description("Stops No Fall from working when using an elytra.")
             .defaultValue(true)
             .build()
     );
@@ -51,13 +60,6 @@ public class NoFall extends Module {
             .build()
     );
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The way you are saved from fall damage.")
-            .defaultValue(Mode.Packet)
-            .build()
-    );
-
     private final Setting<PlaceMode> placeMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("place-mode")
             .description("Whether place mode places before you die or before you take damage.")
@@ -66,19 +68,23 @@ public class NoFall extends Module {
     );
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
+        if (mc.player != null && mc.player.abilities.creativeMode) return;
+
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (elytra.get() && (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.options.keyJump.isPressed() || mc.player.isFallFlying())) {
                 for (int i = 0; i <= Math.ceil(height.get()); i++) {
                     if (!mc.world.getBlockState(mc.player.getBlockPos().add(0, -i, 0)).getMaterial().isReplaceable()) {
                         if (mc.player.getBlockPos().add(0, -i, 0).getY() + 1 + height.get() >= mc.player.getPos().getY()) {
-                            ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
+                            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
                             return;
                         }
                     }
                 }
             } else if (mode.get() == Mode.Packet){
-                ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
+                if(((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
+                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+                }
             } else if ((placeMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2)
                     || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance))){
                 int slot = -1;
@@ -97,5 +103,5 @@ public class NoFall extends Module {
                 }
             }
         }
-    });
+    }
 }

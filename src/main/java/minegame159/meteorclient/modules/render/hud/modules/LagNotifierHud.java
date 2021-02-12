@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
@@ -10,7 +10,6 @@ import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.TickRate;
-import net.minecraft.client.MinecraftClient;
 
 public class LagNotifierHud extends DoubleTextHudModule {
     private static final Color RED = new Color(225, 45, 45);
@@ -29,7 +28,6 @@ public class LagNotifierHud extends DoubleTextHudModule {
             return "4,3";
         }
 
-        MinecraftClient mc = MinecraftClient.getInstance();
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
 
         if (timeSinceLastTick > 10) rightColor = RED;

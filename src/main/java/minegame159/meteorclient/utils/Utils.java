@@ -1,18 +1,17 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
+import minegame159.meteorclient.mixin.MinecraftServerAccessor;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.mixininterface.IMinecraftServer;
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
@@ -26,6 +25,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -43,14 +43,16 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Utils {
     public static MinecraftClient mc;
 
-    public static boolean blockRenderingBlockEntitiesInXray;
     public static boolean firstTimeTitleScreen = true;
+    public static boolean isReleasingTrident;
 
     private static final Random random = new Random();
     private static final DecimalFormat df;
@@ -170,6 +172,10 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, 4);
     }
 
+    public static String getEnchantSimpleName(Enchantment enchantment, int length) {
+        return enchantment.getName(0).getString().substring(0, length);
+    }
+
     public static int search(String text, String filter) {
         int wordsFound = 0;
         String[] words = filter.split(" ");
@@ -198,7 +204,7 @@ public class Utils {
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
             // Singleplayer
-            File folder = ((IMinecraftServer) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
+            File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
@@ -277,7 +283,7 @@ public class Utils {
             default:
                 String keyName = GLFW.glfwGetKeyName(key, 0);
                 if (keyName == null) return "Unknown";
-                return keyName;
+                return StringUtils.capitalize(keyName);
         }
     }
 
@@ -334,24 +340,11 @@ public class Utils {
 
     public static void leftClick() {
         mc.options.keyAttack.setPressed(true);
-        ((IMinecraftClient) mc).leftClick();
+        ((MinecraftClientAccessor) mc).leftClick();
         mc.options.keyAttack.setPressed(false);
     }
     public static void rightClick() {
         ((IMinecraftClient) mc).rightClick();
-    }
-
-    public static Module tryToGetModule(String[] args) {
-        if (args.length < 1) {
-            Chat.error("You must specify module name.");
-            return null;
-        }
-        Module oldModule = ModuleManager.INSTANCE.get(args[0]);
-        if (oldModule == null) {
-            Chat.error("Module with name (highlight)%s (default)doesn't exist.", args[0]);
-            return null;
-        }
-        return oldModule;
     }
 
     public static boolean isShulker(Item item) {
@@ -359,7 +352,7 @@ public class Utils {
     }
 
     public static boolean isThrowable(Item item) {
-        return item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
+        return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
     public static String floatToString(float number) {
@@ -389,15 +382,43 @@ public class Utils {
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
-        itemStack.getOrCreateTag();
-        if (!itemStack.getTag().contains("Enchantments", 9)) {
-            itemStack.getTag().put("Enchantments", new ListTag());
+        CompoundTag tag = itemStack.getOrCreateTag();
+        ListTag listTag;
+
+        // Get list tag
+        if (!tag.contains("Enchantments", 9)) {
+            listTag = new ListTag();
+            tag.put("Enchantments", listTag);
+        }
+        else {
+            listTag = tag.getList("Enchantments", 10);
         }
 
-        ListTag listTag = itemStack.getTag().getList("Enchantments", 10);
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getId(enchantment)));
-        compoundTag.putShort("lvl", (short) level);
-        listTag.add(compoundTag);
+        // Check if item already has the enchantment and modify the level
+        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+
+        for (Tag _t : listTag) {
+            CompoundTag t = (CompoundTag) _t;
+
+            if (t.getString("id").equals(enchId)) {
+                t.putShort("lvl", (short) level);
+                return;
+            }
+        }
+
+        // Add the enchantment if it doesn't already have it
+        CompoundTag enchTag = new CompoundTag();
+        enchTag.putString("id", enchId);
+        enchTag.putShort("lvl", (short) level);
+
+        listTag.add(enchTag);
+    }
+
+    @SafeVarargs
+    public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
+        Map<T, Boolean> map = new HashMap<>();
+        for (T item : checked)
+            map.put(item, true);
+        return new Object2BooleanOpenHashMap<T>(map);
     }
 }

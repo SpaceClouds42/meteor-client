@@ -1,13 +1,12 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -29,10 +28,10 @@ public class Spam extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between specified messages in ticks.")
-            .defaultValue(20)
+            .description("The delay between specified messages in seconds.")
+            .defaultValue(2)
             .min(0)
-            .sliderMax(100)
+            .sliderMax(20)
             .build()
     );
 
@@ -53,12 +52,12 @@ public class Spam extends Module {
 
     @Override
     public void onActivate() {
-        timer = delay.get();
+        timer = delay.get() * 20;
         messageI = 0;
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (messages.isEmpty()) return;
 
         if (timer <= 0) {
@@ -72,11 +71,11 @@ public class Spam extends Module {
 
             mc.player.sendChatMessage(messages.get(i));
 
-            timer = delay.get();
+            timer = delay.get() * 20;
         } else {
             timer--;
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {

@@ -1,25 +1,23 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
 //Updated by squidoodly 18/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
@@ -39,14 +37,14 @@ public class AutoMend extends Module {
     );
 
     private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-armour-slots")
+            .name("use-armor-slots")
             .description("Whether or not to use armor slots to mend items quicker.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
-            .name("remove-finished")
+            .name("remove-when-finished")
             .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
             .defaultValue(true)
             .build()
@@ -103,16 +101,16 @@ public class AutoMend extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof HandledScreen<?>) return;
+    private void onTick(TickEvent.Post event) {
+        if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
 
         if(armourSlots.get()) {
-            if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-                Chat.warning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
+            if(Modules.get().isActive(AutoArmor.class)) {
+                ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {
@@ -121,5 +119,5 @@ public class AutoMend extends Module {
                 else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
             }
         }
-    });
+    }
 }

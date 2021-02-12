@@ -1,26 +1,34 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.world.GoalDirection;
+import net.minecraft.client.options.KeyBinding;
 
 public class AutoWalk extends Module {
     public enum Mode {
         Simple,
         Smart
+    }
+
+    public enum Direction {
+        Forwards,
+        Backwards,
+        Left,
+        Right
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -38,7 +46,19 @@ public class AutoWalk extends Module {
                         timer = 0;
                         createGoal();
                     }
+
+                    unpress();
                 }
+            })
+            .build()
+    );
+
+    private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
+            .name("simple-direction")
+            .description("The direction to walk in simple mode.")
+            .defaultValue(Direction.Forwards)
+            .onChanged(direction1 -> {
+                if (isActive()) unpress();
             })
             .build()
     );
@@ -57,16 +77,29 @@ public class AutoWalk extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (mode.get() == Mode.Simple) unpress();
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         goal = null;
     }
 
-    @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(TickEvent.Pre event) {
         if (mode.get() == Mode.Simple) {
-            ((IKeyBinding) mc.options.keyForward).setPressed(true);
+            switch (direction.get()) {
+                case Forwards:
+                    setPressed(mc.options.keyForward, true);
+                    break;
+                case Backwards:
+                    setPressed(mc.options.keyBack, true);
+                    break;
+                case Left:
+                    setPressed(mc.options.keyLeft, true);
+                    break;
+                case Right:
+                    setPressed(mc.options.keyRight, true);
+                    break;
+            }
         } else {
             if (timer > 20) {
                 timer = 0;
@@ -75,7 +108,19 @@ public class AutoWalk extends Module {
 
             timer++;
         }
-    });
+    }
+
+    private void unpress() {
+        setPressed(mc.options.keyForward, false);
+        setPressed(mc.options.keyBack, false);
+        setPressed(mc.options.keyLeft, false);
+        setPressed(mc.options.keyRight, false);
+    }
+
+    private void setPressed(KeyBinding key, boolean pressed) {
+        key.setPressed(pressed);
+        Input.setKeyState(key, pressed);
+    }
 
     private void createGoal() {
         timer = 0;

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -166,7 +166,7 @@ public class WSection extends WTable {
             removeRow();
             if (widget != null) add(widget);
             triangle = add(new WTriangle()).pad(4).getWidget();
-            triangle.color = triangle.colorHovered = triangle.colorPressed = GuiConfig.INSTANCE.separator;
+            triangle.color = triangle.colorHovered = triangle.colorPressed = GuiConfig.get().separator;
 
             triangle.action = () -> {
                 expanded = !expanded;

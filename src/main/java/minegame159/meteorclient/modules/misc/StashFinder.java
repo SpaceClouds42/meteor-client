@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
@@ -11,8 +11,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.gui.screens.StashFinderChunkScreen;
@@ -21,12 +20,11 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
@@ -34,7 +32,6 @@ import java.io.*;
 import java.util.*;
 
 public class StashFinder extends Module {
-
     public enum Mode {
         Chat,
         Toast
@@ -94,7 +91,7 @@ public class StashFinder extends Module {
     }
 
     @EventHandler
-    private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
+    private void onChunkData(ChunkDataEvent event) {
         // Check the distance.
         double chunkXAbs = Math.abs(event.chunk.getPos().x * 16);
         double chunkZAbs = Math.abs(event.chunk.getPos().z * 16);
@@ -145,10 +142,10 @@ public class StashFinder extends Module {
                         }
                     });
                 } else
-                    Chat.info(Formatting.WHITE + "StashRecorder found stash.");
+                    ChatUtils.moduleInfo(this,"(highlight)Found stash.");
             }
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {

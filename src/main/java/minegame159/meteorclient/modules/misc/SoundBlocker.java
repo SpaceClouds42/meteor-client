@@ -1,12 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -33,12 +32,12 @@ public class SoundBlocker extends Module {
     }
 
     @EventHandler
-    private final Listener<PlaySoundEvent> onPlaySound = new Listener<>(event -> {
+    private void onPlaySound(PlaySoundEvent event) {
         for (SoundEvent sound : sounds.get()) {
             if (sound.getId().equals(event.sound.getId())) {
                 event.cancel();
                 break;
             }
         }
-    });
+    }
 }

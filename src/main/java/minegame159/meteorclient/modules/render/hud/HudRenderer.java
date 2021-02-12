@@ -1,59 +1,49 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud;
 
-import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.rendering.MyFont;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HudRenderer {
-    private MyFont font;
-    private double scale;
-
     public double delta;
+    private final List<Runnable> postTasks = new ArrayList<>();
 
-    public void setScale(double scale) {
-        double scaleA = Math.floor(scale * 10) / 10;
+    public void begin(double scale, double tickDelta, boolean scaleOnly) {
+        TextRenderer.get().begin(scale, scaleOnly, false);
 
-        int scaleI;
-        if (scaleA >= 3) scaleI = 5;
-        else if (scaleA >= 2.5) scaleI = 4;
-        else if (scaleA >= 2) scaleI = 3;
-        else if (scaleA >= 1.5) scaleI = 2;
-        else scaleI = 1;
-
-        font = Fonts.get(scaleI - 1);
-
-        this.scale = (scale - (((scaleI - 1) * 0.5) + 1)) / scaleA + 1;
-    }
-
-    public void begin(double scale, double tickDelta) {
-        setScale(scale);
-
-        Utils.unscaledProjection();
-        font.begin(this.scale);
-
-        delta = tickDelta;
+        this.delta = tickDelta;
     }
 
     public void end() {
-        font.end();
-        Utils.scaledProjection();
+        TextRenderer.get().end();
+
+        for (Runnable runnable : postTasks) {
+            runnable.run();
+        }
+
+        postTasks.clear();
     }
 
     public void text(String text, double x, double y, Color color) {
-        font.renderWithShadow(text, x, y, color);
+        TextRenderer.get().render(text, x, y, color, true);
     }
 
     public double textWidth(String text) {
-        return font.getWidth(text) * scale;
+        return TextRenderer.get().getWidth(text);
     }
 
     public double textHeight() {
-        return font.getHeight() * scale;
+        return TextRenderer.get().getHeight();
+    }
+
+    public void addPostTask(Runnable runnable) {
+        postTasks.add(runnable);
     }
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient;
@@ -8,28 +8,31 @@ package minegame159.meteorclient;
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.rendering.Fonts;
+import minegame159.meteorclient.systems.System;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.files.Savable;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
-import java.io.File;
-
-public class Config extends Savable<Config> {
-    public static Config INSTANCE;
-
-    public final Version version = new Version("0.3.9");
+public class Config extends System<Config> {
+    public final Version version = new Version("0.4.0");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
+
+    public boolean customFont = true;
 
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
 
     public Config() {
-        super(new File(MeteorClient.FOLDER, "config.nbt"));
+        super("config");
 
         devBuild = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata().getCustomValue("meteor-client:devbuild").getAsString();
+    }
+
+    public static Config get() {
+        return Systems.get(Config.class);
     }
 
     public void setPrefix(String prefix) {
@@ -47,6 +50,7 @@ public class Config extends Savable<Config> {
 
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
+        tag.putBoolean("customFont", customFont);
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
@@ -58,6 +62,7 @@ public class Config extends Savable<Config> {
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
         guiConfig.fromTag(tag.getCompound("guiConfig"));
+        if (tag.contains("customFont")) customFont = tag.getBoolean("customFont");
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
 

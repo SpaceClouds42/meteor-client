@@ -1,13 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.accounts;
 
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.MinecraftClient;
@@ -23,7 +23,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public Account(AccountType type, String name) {
         this.type = type;
         this.name = name;
-        this.cache = new AccountCache(type == AccountType.Cracked);
+        this.cache = new AccountCache();
     }
 
     public abstract boolean fetchInfo();
@@ -53,7 +53,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     protected void setSession(Session session) {
-        ((IMinecraftClient) MinecraftClient.getInstance()).setSession(session);
+        ((MinecraftClientAccessor) MinecraftClient.getInstance()).setSession(session);
     }
 
     @Override

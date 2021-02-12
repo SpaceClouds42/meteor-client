@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.commands.commands;
@@ -8,7 +8,6 @@ package minegame159.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
@@ -31,9 +30,5 @@ public class VClip extends Command {
 
             return SINGLE_SUCCESS;
         }));
-    }
-
-    private void sendErrorMsg() {
-        Chat.error("Specify a number.");
     }
 }

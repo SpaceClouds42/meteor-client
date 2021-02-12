@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.gui.screens.settings;
 
 import minegame159.meteorclient.gui.screens.WindowScreen;
@@ -5,11 +10,11 @@ import minegame159.meteorclient.gui.widgets.WCheckbox;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.List;
 
@@ -44,7 +49,7 @@ public class ParticleEffectListSettingScreen extends WindowScreen {
             if (!(particleType instanceof ParticleEffect)) continue;
 
             ParticleEffect effect = (ParticleEffect) particleType;
-            String name = WordUtils.capitalize(effect.asString().substring(10).replace("_", " "));
+            String name = Names.get(effect);
 
             if (!filterText.isEmpty()) if (!StringUtils.containsIgnoreCase(name, filterText)) continue;
 

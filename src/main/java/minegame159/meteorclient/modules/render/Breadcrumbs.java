@@ -1,20 +1,19 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayDeque;
@@ -75,7 +74,7 @@ public class Breadcrumbs extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lastDimension != mc.world.getDimension()) {
             for (Section sec : sections) sectionPool.free(sec);
             sections.clear();
@@ -94,12 +93,12 @@ public class Breadcrumbs extends Module {
         }
 
         lastDimension = mc.world.getDimension();
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Section section : sections) section.render();
-    });
+    }
 
     private boolean isFarEnough(double x, double y, double z) {
         return Math.abs(mc.player.getX() - x) >= sectionLength.get() || Math.abs(mc.player.getY() - y) >= sectionLength.get() || Math.abs(mc.player.getZ() - z) >= sectionLength.get();

@@ -1,28 +1,28 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -32,18 +32,21 @@ public class AutoTrap extends Module {
     public enum TopMode {
         Full,
         Top,
+        Face,
         None
     }
 
     public enum BottomMode {
         Single,
         Platform,
+        Full,
         None
     }
 
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // General
 
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
@@ -59,6 +62,15 @@ public class AutoTrap extends Module {
             .build()
     );
 
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+            .name("range")
+            .description("The radius players can be in to be targeted.")
+            .defaultValue(5)
+            .sliderMin(0)
+            .sliderMax(10)
+            .build()
+    );
+
     private final Setting<Integer> delaySetting = sgGeneral.add(new IntSetting.Builder()
             .name("place-delay")
             .description("How many ticks between block placements.")
@@ -68,25 +80,25 @@ public class AutoTrap extends Module {
             .build()
     );
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("How far away you can target players.")
-            .defaultValue(5)
-            .sliderMin(0)
-            .sliderMax(10)
-            .build()
-    );
-
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
+            .name("auto-toggle")
             .description("Turns off after placing.")
             .defaultValue(true)
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when placing.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Render
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Whether to render blocks being mined.")
+            .description("Renders a block overlay where the obsidian will be placed.")
             .defaultValue(true)
             .build()
     );
@@ -113,7 +125,7 @@ public class AutoTrap extends Module {
     );
 
     private PlayerEntity target;
-    private List<BlockPos> placePositions = new ArrayList<>();
+    private final List<BlockPos> placePositions = new ArrayList<>();
     private boolean placed;
     private int delay;
 
@@ -130,9 +142,8 @@ public class AutoTrap extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-
-        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem(), itemStack -> true);
+    private void onTick(TickEvent.Pre event) {
+        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
 
         if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
             sendToggledMsg();
@@ -140,92 +151,103 @@ public class AutoTrap extends Module {
             return;
         }
 
-        if (slot == -1) return;
+        if (slot == -1) {
+            placePositions.clear();
+            return;
+        }
 
         if (target == null || mc.player.distanceTo(target) > range.get()) {
+            placePositions.clear();
             target = findTarget();
             placed = false;
             return;
         }
 
-        placePositions.clear();
-        placePositions = getPlacePos(target);
+        findPlacePos(target);
 
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (PlayerUtils.placeBlockRotate(placePositions.get(placePositions.size()-1))) {
-                placePositions.remove(placePositions.get(placePositions.size() - 1));
+            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50)) {
+                placePositions.remove(blockPos);
                 placed = true;
             }
 
-            mc.player.inventory.selectedSlot = prevSlot;
             delay = 0;
         } else delay++;
-    });
-
-    @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    });
-
-    private boolean checkReplace(BlockPos pos) {
-        return mc.world.getBlockState(pos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), pos, ShapeContext.absent());
     }
 
-    private List<BlockPos> getPlacePos(PlayerEntity target) {
-        if (!placePositions.isEmpty()) placePositions.clear();
+    @EventHandler
+    private void onRender(RenderEvent event) {
+        if (!render.get() || placePositions.isEmpty()) return;
+        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+    }
 
+    private void findPlacePos(PlayerEntity target) {
+        placePositions.clear();
         BlockPos targetPos = target.getBlockPos();
 
         switch (topPlacement.get()) {
             case Full:
-                if (checkReplace(targetPos.add(0, 2, 0))) add(targetPos.add(0, 2, 0));
-                if (checkReplace(targetPos.add(1, 1, 0))) add(targetPos.add(1, 1, 0));
-                if (checkReplace(targetPos.add(-1, 1, 0))) add(targetPos.add(-1, 1, 0));
-                if (checkReplace(targetPos.add(0, 1, 1))) add(targetPos.add(0, 1, 1));
-                if (checkReplace(targetPos.add(0, 1, -1))) add(targetPos.add(0, 1, -1));
+                add(targetPos.add(0, 2, 0));
+                add(targetPos.add(1, 1, 0));
+                add(targetPos.add(-1, 1, 0));
+                add(targetPos.add(0, 1, 1));
+                add(targetPos.add(0, 1, -1));
+                break;
+            case Face:
+                add(targetPos.add(1, 1, 0));
+                add(targetPos.add(-1, 1, 0));
+                add(targetPos.add(0, 1, 1));
+                add(targetPos.add(0, 1, -1));
                 break;
             case Top:
-                if (checkReplace(targetPos.add(0, 2, 0))) add(targetPos.add(0, 2, 0));
-                break;
+                add(targetPos.add(0, 2, 0));
         }
 
         switch (bottomPlacement.get()) {
             case Platform:
-                if (checkReplace(targetPos.add(0, -1, 0))) add(targetPos.add(0, -1, 0));
-                if (checkReplace(targetPos.add(1, -1, 0))) add(targetPos.add(1, -1, 0));
-                if (checkReplace(targetPos.add(-1, -1, 0))) add(targetPos.add(0, -1, 0));
-                if (checkReplace(targetPos.add(0, -1, 1))) add(targetPos.add(0, -1, 1));
-                if (checkReplace(targetPos.add(0, -1, -1))) add(targetPos.add(0, -1, -1));
+                add(targetPos.add(0, -1, 0));
+                add(targetPos.add(1, -1, 0));
+                add(targetPos.add(0, -1, 0));
+                add(targetPos.add(0, -1, 1));
+                add(targetPos.add(0, -1, -1));
+                break;
+            case Full:
+                add(targetPos.add(1, 0, 0));
+                add(targetPos.add(-1, 0, 0));
+                add(targetPos.add(0, 0, -1));
+                add(targetPos.add(0, 0, 1));
                 break;
             case Single:
-                if (checkReplace(targetPos.add(0, -1, 0))) add(targetPos.add(0, -1, 0));
-                break;
+                add(targetPos.add(0, -1, 0));
         }
-        return placePositions;
     }
 
 
     private void add(BlockPos blockPos) {
-        if (!placePositions.contains(blockPos)) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
     }
 
     private PlayerEntity findTarget() {
-        for(PlayerEntity player : mc.world.getPlayers()){
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive()) continue;
+        for (PlayerEntity player : mc.world.getPlayers()){
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive()) continue;
             if (target == null) target = player;
             else if (mc.player.distanceTo(player) < mc.player.distanceTo(target)) target = player;
         }
 
-        for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
-            if (!FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+        for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
+            if (!Friends.get().attack(fakeTarget) || !fakeTarget.isAlive()) continue;
             if (target == null) target = fakeTarget;
             else if (mc.player.distanceTo(fakeTarget) < mc.player.distanceTo(target)) target = fakeTarget;
         }
 
         return target;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }

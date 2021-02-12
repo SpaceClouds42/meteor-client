@@ -1,14 +1,12 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -18,7 +16,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 
 public class AutoClicker extends Module {
-
     public enum Mode {
         Hold,
         Press
@@ -40,14 +37,14 @@ public class AutoClicker extends Module {
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
-            .name("Button")
+            .name("button")
             .description("Which button to press.")
             .defaultValue(Button.Right)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
+            .name("click-delay")
             .description("The amount of delay between clicks in ticks.")
             .defaultValue(2)
             .min(0)
@@ -64,26 +61,26 @@ public class AutoClicker extends Module {
     @Override
     public void onActivate() {
         timer = 0;
-        ((IKeyBinding)mc.options.keyAttack).setPressed(false);
-        ((IKeyBinding)mc.options.keyUse).setPressed(false);
+        mc.options.keyAttack.setPressed(false);
+        mc.options.keyUse.setPressed(false);
     }
 
     @Override
     public void onDeactivate() {
-        ((IKeyBinding)mc.options.keyAttack).setPressed(false);
-        ((IKeyBinding)mc.options.keyUse).setPressed(false);
+        mc.options.keyAttack.setPressed(false);
+        mc.options.keyUse.setPressed(false);
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         switch (mode.get()) {
             case Hold:
                 switch (button.get()) {
                     case Left:
-                        ((IKeyBinding)mc.options.keyAttack).setPressed(true);
+                        mc.options.keyAttack.setPressed(true);
                         break;
                     case Right:
-                        ((IKeyBinding)mc.options.keyUse).setPressed(true);
+                        mc.options.keyUse.setPressed(true);
                         break;
                 }
                 break;
@@ -100,6 +97,7 @@ public class AutoClicker extends Module {
                     }
                     timer = 0;
                 }
+                break;
         }
-    });
+    }
 }

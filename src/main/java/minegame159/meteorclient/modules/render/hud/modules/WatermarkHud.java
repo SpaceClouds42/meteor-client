@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
@@ -15,6 +15,6 @@ public class WatermarkHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        return Config.INSTANCE.version.getOriginalString();
+        return Config.get().version.getOriginalString();
     }
 }

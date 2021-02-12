@@ -1,34 +1,36 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
 import com.google.common.reflect.TypeToken;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.render.RenderEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.UuidNameHistoryResponseItem;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.util.math.Vec3d;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -53,6 +55,14 @@ public class EntityOwner extends Module {
             .build()
     );
 
+    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
+            .name("projectiles")
+            .description("Display owner names of projectiles.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Vec3d pos = new Vec3d(0, 0, 0);
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -65,60 +75,57 @@ public class EntityOwner extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            UUID ownerUuid = null;
+            UUID ownerUuid;
+
             if (entity instanceof TameableEntity) ownerUuid = ((TameableEntity) entity).getOwnerUuid();
             else if (entity instanceof HorseBaseEntity) ownerUuid = ((HorseBaseEntity) entity).getOwnerUuid();
-            if (ownerUuid == null) continue;
+            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
+            else continue;
 
-            String name = getOwnerName(ownerUuid);
-            renderNametag(event, entity, name);
+            if (ownerUuid != null) {
+                Vec3d p = entity.getPos();
+                ((IVec3d) pos).set(p.x, p.y + entity.getEyeHeight(entity.getPose()) + 0.75, p.z);
+
+                if (NametagUtils.to2D(pos, scale.get())) {
+                    renderNametag(getOwnerName(ownerUuid));
+                }
+            }
         }
-    });
+    }
 
-    private void renderNametag(RenderEvent event, Entity entity, String name) {
-        Camera camera = mc.gameRenderer.getCamera();
+    private void renderNametag(String name) {
+        TextRenderer text = TextRenderer.get();
 
-        // Compute scale
-        double scale = 0.025 * this.scale.get();
-        double dist = Utils.distanceToCamera(entity);
-        if (dist > 8) scale *= dist / 8;
+        NametagUtils.begin(pos);
+        text.beginBig();
 
-        // Setup the rotation
-        Matrices.push();
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.25;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-        Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
-        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
-        Matrices.rotate(camera.getPitch(), 1, 0, 0);
-        Matrices.scale(-scale, -scale, scale);
+        double w = text.getWidth(name);
 
-        // Render background
-        double ii = Fonts.get(2).getWidth(name) / 2.0;
-        double i = ii * 0.25;
+        double x = -w / 2;
+        double y = -text.getHeight();
+
         MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        MB.quad(-i - 1, 0, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, 0, 0, BACKGROUND);
+        MB.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
         MB.end();
 
-        // Render name text
-        Matrices.scale(0.25, 0.25, 1);
-        Fonts.get(2).render(name, -ii, 0, TEXT);
+        text.render(name, x, y, TEXT);
 
-        Matrices.pop();
+        text.end();
+        NametagUtils.end();
     }
 
     private String getOwnerName(UUID uuid) {
-// gets the name if the entity owner is online.
+        // Check if the player is online
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
         if (player != null) return player.getGameProfile().getName();
 
-        // Checks cache
+        // Check cache
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-// Makes a HTTP request to Mojang API. Fuck MineMonkey for pointing this out.
+        // Makes a HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);

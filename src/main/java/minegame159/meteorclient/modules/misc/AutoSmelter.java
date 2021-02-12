@@ -1,14 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
+import minegame159.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -81,14 +81,14 @@ public class AutoSmelter extends Module {
         int slot = -1;
 
         for (int i = 3; i < c.slots.size(); i++) {
-            if (((IAbstractFurnaceScreenHandler) c).isSmeltableI(c.slots.get(i).getStack())) {
+            if (((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(c.slots.get(i).getStack())) {
                 slot = i;
                 break;
             }
         }
 
         if (slot == -1) {
-            Chat.warning(this, "You do not have any items in your inventory that can be smelted... disabling.");
+            ChatUtils.moduleError(this, "You do not have any items in your inventory that can be smelted... disabling.");
             toggle();
             return true;
         }
@@ -100,12 +100,12 @@ public class AutoSmelter extends Module {
     }
 
     private boolean checkFuel(AbstractFurnaceScreenHandler c) {
-        if (c.getFuelProgress() <= 1 && !((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(1).getStack())) {
+        if (c.getFuelProgress() <= 1 && !((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(1).getStack())) {
             if (!c.slots.get(1).getStack().isEmpty()) {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
-                    Chat.warning(this, "Your inventory is currently full... disabling.");
+                    ChatUtils.moduleError(this, "Your inventory is currently full... disabling.");
                     toggle();
                     return true;
                 }
@@ -113,14 +113,14 @@ public class AutoSmelter extends Module {
 
             int slot = -1;
             for (int i = 3; i < c.slots.size(); i++) {
-                if (((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(i).getStack())) {
+                if (((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(i).getStack())) {
                     slot = i;
                     break;
                 }
             }
 
             if (slot == -1) {
-                Chat.warning(this, "You do not have any fuel in your inventory... disabling.");
+                ChatUtils.moduleError(this, "You do not have any fuel in your inventory... disabling.");
                 toggle();
                 return true;
             }
@@ -136,7 +136,7 @@ public class AutoSmelter extends Module {
         InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
-            Chat.warning(this, "Your inventory is full... disabling.");
+            ChatUtils.moduleError(this, "Your inventory is full... disabling.");
             toggle();
             return true;
         }

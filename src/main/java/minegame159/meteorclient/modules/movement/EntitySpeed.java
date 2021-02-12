@@ -1,7 +1,11 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.LivingEntityMoveEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -45,7 +49,7 @@ public class EntitySpeed extends Module {
     }
 
     @EventHandler
-    private final Listener<LivingEntityMoveEvent> onLivingEntityMove = new Listener<>(event -> {
+    private void onLivingEntityMove(LivingEntityMoveEvent event) {
         if (event.entity.getPrimaryPassenger() != mc.player) return;
 
         // Check for onlyOnGround and inWater
@@ -56,5 +60,5 @@ public class EntitySpeed extends Module {
         // Set horizontal velocity
         Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
         ((IVec3d) event.movement).setXZ(vel.x, vel.z);
-    });
+    }
 }

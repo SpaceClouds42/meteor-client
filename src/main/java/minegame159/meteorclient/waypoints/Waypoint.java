@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.waypoints;
@@ -9,6 +9,7 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.nbt.CompoundTag;
 
@@ -32,6 +33,8 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public boolean overworld, nether, end;
 
+    public Dimension actualDimension;
+
     public void renderIcon(double x, double y, double z, double a, double size) {
         MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
 
@@ -46,19 +49,15 @@ public class Waypoint implements ISerializable<Waypoint> {
         MB.pos(x + size, y + size, z).texture(1, 1).color(color).endVertex();
         MB.pos(x, y + size, z).texture(0, 1).color(color).endVertex();
 
-        Waypoints.ICONS.get(icon).bindTexture();
+        Waypoints.get().icons.get(icon).bindTexture();
         MB.end();
 
         color.a = preA;
     }
 
-    public void renderIcon(double x, double y, double z) {
-        renderIcon(x, y, z, 1, 16);
-    }
-
     private int findIconIndex() {
         int i = 0;
-        for (String icon : Waypoints.ICONS.keySet()) {
+        for (String icon : Waypoints.get().icons.keySet()) {
             if (this.icon.equals(icon)) return i;
             i++;
         }
@@ -67,8 +66,8 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     private int correctIconIndex(int i) {
-        if (i < 0) return Waypoints.ICONS.size() + i;
-        else if (i >= Waypoints.ICONS.size()) return i - Waypoints.ICONS.size();
+        if (i < 0) return Waypoints.get().icons.size() + i;
+        else if (i >= Waypoints.get().icons.size()) return i - Waypoints.get().icons.size();
         return i;
     }
 
@@ -76,7 +75,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         i = correctIconIndex(i);
 
         int _i = 0;
-        for (String icon : Waypoints.ICONS.keySet()) {
+        for (String icon : Waypoints.get().icons.keySet()) {
             if (_i == i) return icon;
             _i++;
         }
@@ -108,6 +107,8 @@ public class Waypoint implements ISerializable<Waypoint> {
         tag.putInt("maxVisibleDistance", maxVisibleDistance);
         tag.putDouble("scale", scale);
 
+        tag.putString("dimension", actualDimension.name());
+
         tag.putBoolean("overworld", overworld);
         tag.putBoolean("nether", nether);
         tag.putBoolean("end", end);
@@ -129,11 +130,13 @@ public class Waypoint implements ISerializable<Waypoint> {
         maxVisibleDistance = tag.getInt("maxVisibleDistance");
         scale = tag.getDouble("scale");
 
+        actualDimension = Dimension.valueOf(tag.getString("dimension"));
+
         overworld = tag.getBoolean("overworld");
         nether = tag.getBoolean("nether");
         end = tag.getBoolean("end");
 
-        if (!Waypoints.ICONS.containsKey(icon)) icon = "Square";
+        if (!Waypoints.get().icons.containsKey(icon)) icon = "Square";
 
         return this;
     }

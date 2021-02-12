@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
@@ -182,6 +182,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noCrosshair = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-crosshair")
+            .description("Disables rendering of the crosshair.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
@@ -280,5 +287,9 @@ public class NoRender extends Module {
     
     public boolean noSkylightUpdates() {
         return isActive() && noSkylightUpdates.get();
+    }
+
+    public boolean noCrosshair() {
+        return isActive() && noCrosshair.get();
     }
 }

@@ -1,22 +1,21 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -45,13 +44,6 @@ public class Nuker extends Module {
             .name("mode")
             .description("The way the blocks are broken.")
             .defaultValue(Mode.All)
-            .build()
-    );
-
-    private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
-            .name("packet-mine")
-            .description("Mines blocks using packet spamming.")
-            .defaultValue(false)
             .build()
     );
 
@@ -91,6 +83,13 @@ public class Nuker extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the blocks being mined.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Pool<BlockPos.Mutable> blockPool = new Pool<>(BlockPos.Mutable::new);
     private final List<BlockPos.Mutable> blocks = new ArrayList<>();
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
@@ -108,7 +107,7 @@ public class Nuker extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
             mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;
@@ -172,30 +171,23 @@ public class Nuker extends Module {
         boolean breaking = false;
 
         for (BlockPos.Mutable pos : blocks) {
-            if (packetMine.get()) {
-                // Packet mine
-                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, Direction.UP));
-                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.UP));
-            } else {
-                // Check last block
-                if (!lastBlockPos.equals(pos)) {
-                    // Im not proud of this but it works so shut the fuck up
-                    try {
-                        mc.interactionManager.cancelBlockBreaking();
-                        mc.interactionManager.attackBlock(pos, Direction.UP);
-                        mc.player.swingHand(Hand.MAIN_HAND);
-                    } catch (Exception ignored) {}
-                }
-
-                // Break block
-                lastBlockPos.set(pos);
-                mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
-                mc.player.swingHand(Hand.MAIN_HAND);
-
-                breaking = true;
-                hasLastBlockPos = true;
-                break;
+            // Check last block
+            if (!lastBlockPos.equals(pos)) {
+                // Im not proud of this but it works so shut the fuck up
+                try {
+                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> cancelMine(pos));
+                    else cancelMine(pos);
+                } catch (Exception ignored) {}
             }
+
+            // Break block
+            lastBlockPos.set(pos);
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> normalMine(pos));
+            else normalMine(pos);
+
+            breaking = true;
+            hasLastBlockPos = true;
+            break;
         }
 
         if (!breaking) mc.interactionManager.cancelBlockBreaking();
@@ -203,7 +195,20 @@ public class Nuker extends Module {
         // Empty blocks list
         for (BlockPos.Mutable pos : blocks) blockPool.free(pos);
         blocks.clear();
-    });
+    }
+
+    private void normalMine(BlockPos pos) {
+        if (mc.interactionManager != null && mc.player != null) {
+            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
+    }
+
+    private void cancelMine(BlockPos pos) {
+        mc.interactionManager.cancelBlockBreaking();
+        mc.interactionManager.attackBlock(pos, Direction.UP);
+        mc.player.swingHand(Hand.MAIN_HAND);
+    }
 
     public boolean noParticles() {
         return isActive() && noParticles.get();

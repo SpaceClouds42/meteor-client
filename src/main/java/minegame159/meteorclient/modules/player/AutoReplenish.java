@@ -1,43 +1,45 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
-//Created by squidoodly 8/05/2020
-//Updated by squidoodly 14/07/2020
-
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.game.OpenScreenEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.ItemStackAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.combat.AutoTotem;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@InvUtils.Priority(priority = 1)
 public class AutoReplenish extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
-            .name("amount")
-            .description("The amount of items left this actives at.")
+    private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
+            .name("threshold")
+            .description("The threshold of items left this actives at.")
             .defaultValue(8)
             .min(1)
             .sliderMax(63)
+            .build()
+    );
+
+    private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The tick delay to replenish your hotbar.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(10)
             .build()
     );
 
@@ -48,23 +50,16 @@ public class AutoReplenish extends Module {
             .build()
     );
 
-    private final Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
-            .name("alert")
-            .description("Sends a client-side alert in chat when you run out of items.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
             .name("unstackable")
-            .description("Replenishes unstackable items. Only works in your main hand or offhand.")
+            .description("Replenishes unstackable items.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
             .name("search-hotbar")
-            .description("Refills items if they happen to be in your hotbar.")
+            .description("Uses items in your hotbar to replenish if they are the only ones left.")
             .defaultValue(true)
             .build()
     );
@@ -72,182 +67,134 @@ public class AutoReplenish extends Module {
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
             .name("excluded-items")
             .description("Items that WILL NOT replenish.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new ArrayList<>())
             .build()
     );
 
-    private final Setting<Boolean> workInCont = sgGeneral.add(new BoolSetting.Builder()
-            .name("work-in-containers")
-            .description("Whether or not for this module to work when you are currently in a container GUI.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> workInInv = sgGeneral.add(new BoolSetting.Builder()
-            .name("work-in-inv")
-            .description("Whether or not this will work while you are in your inventory.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-in-inventory")
-            .description("Stops replenishing items when you are currently in your inventory.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final List<Item> items = new ArrayList<>();
-
-    private Item lastMainHand, lastOffHand;
-    private int lastSlot;
+    private final ItemStack[] items = new ItemStack[10];
+    private boolean prevHadOpenScreen;
+    private int tickDelayLeft;
 
     public AutoReplenish(){
         super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
+
+        for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);
     }
 
     @Override
     public void onActivate() {
-        lastSlot = mc.player.inventory.selectedSlot;
-    }
-
-    @Override
-    public void onDeactivate() {
-        lastMainHand = lastOffHand = null;
+        fillItems();
+        tickDelayLeft = tickDelay.get();
+        prevHadOpenScreen = mc.currentScreen != null;
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (!workInCont.get() && !workInInv.get()) {
-            if (mc.currentScreen instanceof HandledScreen<?>) return;
-        } else if (workInCont.get() && !workInInv.get()) {
-            if (mc.currentScreen instanceof HandledScreen<?> && mc.currentScreen instanceof InventoryScreen) return;
-        } else if (!workInCont.get() && workInInv.get()) {
-            if (mc.currentScreen instanceof HandledScreen<?> && !(mc.currentScreen instanceof InventoryScreen)) return;
+    private void onTick(TickEvent.Pre event) {
+        if (mc.currentScreen == null && prevHadOpenScreen) {
+            fillItems();
         }
-        if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
 
-        // Hotbar, stackable items
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.inventory.getStack(i);
-            InvUtils.FindItemResult result = InvUtils.findItemWithCount(stack.getItem());
-            if(result.slot < i && i != mc.player.inventory.selectedSlot) continue;
-            if(isUnstackable(stack.getItem()) || stack.getItem() == Items.AIR) continue;
-            if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
-                int slot = -1;
-                if (searchHotbar.get()) {
-                    for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j)) && mc.player.inventory.selectedSlot != j && i != j) {
-                            slot = j;
-                            break;
-                        }
-                    }
-                }
-                if (slot == -1) {
-                    for (int j = 9; j < mc.player.inventory.main.size(); j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j))) {
-                            slot = j;
-                            break;
-                        }
-                    }
-                }
-                if(slot != -1) {
-                    moveItems(slot, i, true);
-                }
+        prevHadOpenScreen = mc.currentScreen != null;
+        if (mc.player.currentScreenHandler.getStacks().size() < 45 || mc.currentScreen != null) return;
+
+        if (tickDelayLeft <= 0) {
+            tickDelayLeft = tickDelay.get();
+
+            // Hotbar
+            for (int i = 0; i < 9; i++) {
+                ItemStack stack = mc.player.inventory.getStack(i);
+                checkSlot(i, stack);
+            }
+
+            // Offhand
+            if (offhand.get() && !Modules.get().get(AutoTotem.class).getLocked()) {
+                ItemStack stack = mc.player.getOffHandStack();
+                checkSlot(InvUtils.OFFHAND_SLOT, stack);
             }
         }
-
-        // OffHand, stackable items
-        if (offhand.get()) {
-            ItemStack stack = mc.player.getOffHandStack();
-            if(stack.getItem() != Items.AIR) {
-                if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
-                    int slot = -1;
-                    for (int i = 9; i < mc.player.inventory.main.size(); i++) {
-                        if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
-                            slot = i;
-                            break;
-                        }
-                    }
-                    if (searchHotbar.get() && slot == -1) {
-                        for (int i = 0; i < 9; i++) {
-                            if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
-                                slot = i;
-                                break;
-                            }
-                        }
-                    }
-                    if (slot != -1) {
-                        moveItems(slot, InvUtils.OFFHAND_SLOT, true);
-                    }
-                }
-            }
+        else {
+            tickDelayLeft--;
         }
-
-        // MainHand, unstackable items
-        if (unstackable.get()) {
-            ItemStack mainHandItemStack = mc.player.getMainHandStack();
-            if (mainHandItemStack.getItem() != lastMainHand && !excludedItems.get().contains(lastMainHand) && mainHandItemStack.isEmpty() && (lastMainHand != null && lastMainHand != Items.AIR) && isUnstackable(lastMainHand) && mc.player.inventory.selectedSlot == lastSlot) {
-                int slot = findSlot(lastMainHand, lastSlot);
-                if (slot != -1) moveItems(slot, lastSlot, false);
-            }
-            lastMainHand = mc.player.getMainHandStack().getItem();
-            lastSlot = mc.player.inventory.selectedSlot;
-
-            if (offhand.get()) {
-                // OffHand, unstackable items
-                ItemStack offHandItemStack = mc.player.getOffHandStack();
-                if (offHandItemStack.getItem() != lastOffHand && !excludedItems.get().contains(lastOffHand) && offHandItemStack.isEmpty() && (lastOffHand != null && lastOffHand != Items.AIR) && isUnstackable(lastOffHand)) {
-                    int slot = findSlot(lastOffHand, InvUtils.OFFHAND_SLOT);
-                    if (slot != -1) moveItems(slot, InvUtils.OFFHAND_SLOT, false);
-                }
-                lastOffHand = mc.player.getOffHandStack().getItem();
-            }
-        }
-    });
-
-    @EventHandler
-    private final Listener<OpenScreenEvent> onScreen = new Listener<>(event -> {
-        if (mc.currentScreen instanceof HandledScreen<?>) {
-            if (!(mc.currentScreen instanceof AbstractInventoryScreen)) items.clear();
-            lastMainHand = lastOffHand = null;
-        }
-    });
-
-    private void moveItems(int from, int to, boolean stackable) {
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(to), 0, SlotActionType.PICKUP);
-        if (stackable) InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
     }
 
-    private int findSlot(Item item, int excludeSlot) {
-        int slot = findItems(item, excludeSlot);
+    private void checkSlot(int slot, ItemStack stack) {
+        ItemStack prevStack = getItem(slot);
 
-        if(slot == -1 && !items.contains(item)){
-            if(alert.get()) {
-                Chat.warning(this, "You lack (highlight)%s(default) necessary to refill. Cannot refill.", item.toString());
+        // Stackable items 1
+        if (!stack.isEmpty() && stack.isStackable() && !excludedItems.get().contains(stack.getItem())) {
+            if (stack.getCount() <= threshold.get()) {
+                addSlots(slot, findItem(stack, slot, threshold.get() - stack.getCount() + 1));
             }
-
-            items.add(item);
         }
 
-        return slot;
+        if (stack.isEmpty() && !prevStack.isEmpty() && !excludedItems.get().contains(prevStack.getItem())) {
+            // Stackable items 2
+            if (prevStack.isStackable()) {
+                addSlots(slot, findItem(prevStack, slot, threshold.get() - stack.getCount() + 1));
+            }
+            // Unstackable items
+            else {
+                if (unstackable.get()) {
+                    addSlots(slot, findItem(prevStack, slot, 1));
+                }
+            }
+        }
+
+        setItem(slot, stack);
     }
 
-    private int findItems(Item item, int excludeSlot) {
+    private int findItem(ItemStack itemStack, int excludedSlot, int goodEnoughCount) {
         int slot = -1;
+        int count = 0;
 
-        for (int i = searchHotbar.get() ? 0 : 9; i < mc.player.inventory.main.size(); i++) {
-            if (i != excludeSlot && mc.player.inventory.main.get(i).getItem() == item && (!searchHotbar.get() || i != mc.player.inventory.selectedSlot)) {
-                slot = i;
-                return slot;
+        for (int i = mc.player.inventory.size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
+            ItemStack stack = mc.player.inventory.getStack(i);
+
+            if (i != excludedSlot && stack.getItem() == itemStack.getItem() && ItemStack.areTagsEqual(itemStack, stack)) {
+                if (stack.getCount() > count) {
+                    slot = i;
+                    count = stack.getCount();
+
+                    if (count >= goodEnoughCount) break;
+                }
             }
         }
 
         return slot;
     }
 
-    private boolean isUnstackable(Item item) {
-        return item.getMaxCount() <= 1;
+    private void addSlots(int to, int from) {
+        if (to == -1 || from == -1) return;
+
+        List<Integer> slots = new ArrayList<>(3);
+        slots.add(InvUtils.invIndexToSlotId(from));
+        slots.add(InvUtils.invIndexToSlotId(to));
+        slots.add(InvUtils.invIndexToSlotId(from));
+
+        InvUtils.addSlots(slots, this.getClass());
+    }
+
+    private void fillItems() {
+        for (int i = 0; i < 9; i++) {
+            setItem(i, mc.player.inventory.getStack(i));
+        }
+
+        setItem(InvUtils.OFFHAND_SLOT, mc.player.getOffHandStack());
+    }
+
+    private ItemStack getItem(int slot) {
+        if (slot == InvUtils.OFFHAND_SLOT) slot = 9;
+
+        return items[slot];
+    }
+
+    private void setItem(int slot, ItemStack stack) {
+        if (slot == InvUtils.OFFHAND_SLOT) slot = 9;
+
+        ItemStack s = items[slot];
+        ((ItemStackAccessor) (Object) s).setItem(stack.getItem());
+        s.setCount(stack.getCount());
+        s.setTag(stack.getTag());
+        ((ItemStackAccessor) (Object) s).setEmpty(stack.isEmpty());
     }
 }

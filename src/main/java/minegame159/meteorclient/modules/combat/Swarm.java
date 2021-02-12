@@ -1,28 +1,34 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.combat;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.commands.CommandManager;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.commands.Commands;
+import minegame159.meteorclient.commands.commands.swarm.SwarmQueen;
+import minegame159.meteorclient.commands.commands.swarm.SwarmSlave;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 
@@ -53,13 +59,13 @@ public class Swarm extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
-            .name("ip-address")
+            .name("iP-address")
             .description("The IP address of the Queen.")
             .defaultValue("localhost")
             .build());
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
-            .name("Port")
+            .name("port")
             .description("The port used for connections.")
             .defaultValue(7777)
             .sliderMin(1)
@@ -100,7 +106,7 @@ public class Swarm extends Module {
         table2.add(connect);
         WButton reset = new WButton("Reset");
         reset.action = () -> {
-            Chat.info("Swarm: Closing all connections.");
+            ChatUtils.moduleInfo(this, "Closing all connections.");
             closeAllServerConnections();
             currentMode = Mode.Idle;
             setLabel();
@@ -158,21 +164,21 @@ public class Swarm extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (targetBlock != null)
             mine();
-    });
+    }
 
     public void idle() {
         currentMode = Mode.Idle;
-        if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
-            ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
+        if (Modules.get().isActive(InfinityMiner.class))
+            Modules.get().get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     public void mine() {
-        Chat.info("Swarm: Starting mining job.");
+        ChatUtils.moduleInfo(this, "Starting mining job.");
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
@@ -199,7 +205,7 @@ public class Swarm extends Module {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
-                        Chat.info("Server not found. Attempting to reconnect in 5 seconds.");
+                        ChatUtils.moduleWarning(Modules.get().get(Swarm.class), "Server not found. Attempting to reconnect in 5 seconds.");
                     }
                     if (socket == null) {
                         Thread.sleep(5000);
@@ -208,13 +214,13 @@ public class Swarm extends Module {
                 if (socket != null) {
                     inputStream = socket.getInputStream();
                     dataInputStream = new DataInputStream(inputStream);
-                    Chat.info("New Socket");
+                    ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Socket");
                     while (!isInterrupted()) {
                         if (socket != null) {
                             String read;
                             read = dataInputStream.readUTF();
                             if (!read.equals("")) {
-                                Chat.info("New Command: " + read);
+                                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Command: " + read);
                                 execute(read);
                             }
                         }
@@ -223,7 +229,7 @@ public class Swarm extends Module {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                Chat.error("There is an error in your connection to the server.");
+                ChatUtils.moduleError(Modules.get().get(Swarm.class), "There is an error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -231,7 +237,7 @@ public class Swarm extends Module {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        Chat.error("There is an error in your connection to the server.");
+                        ChatUtils.moduleError(Modules.get().get(Swarm.class), "There is an error in your connection to the server.");
                     }
                 }
             }
@@ -256,7 +262,7 @@ public class Swarm extends Module {
             try {
                 int port = serverPort.get();
                 this.serverSocket = new ServerSocket(port);
-                Chat.info("Swarm Server: New Server Opened On Port " + serverPort.get());
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Server Opened On Port " + serverPort.get());
                 start();
             } catch (Exception ignored) {
 
@@ -266,7 +272,7 @@ public class Swarm extends Module {
         @Override
         public void run() {
             try {
-                Chat.info("Swarm Server: Listening for incoming connections.");
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "Listening for incoming connections.");
                 while (!this.isInterrupted()) {
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
@@ -279,7 +285,7 @@ public class Swarm extends Module {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    Chat.info("Swarm Server: New slave connected.");
+                    ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New slave connected.");
                     break;
                 }
             }
@@ -295,7 +301,7 @@ public class Swarm extends Module {
                 }
                 serverSocket.close();
             } catch (Exception e) {
-                Chat.info("Server closed.");
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "Server closed.");
             }
         }
 
@@ -352,7 +358,7 @@ public class Swarm extends Module {
                 outputStream.close();
                 dataOutputStream.close();
             } catch (Exception e) {
-                Chat.info("Error in subsystem.");
+                ChatUtils.moduleError(Modules.get().get(Swarm.class), "Error in subsystem.");
             }
         }
 
@@ -367,27 +373,26 @@ public class Swarm extends Module {
 
     public void execute(@Nonnull String s) {
         try {
-            CommandManager.dispatch(s);
+            Commands.get().dispatch(s);
         } catch (CommandSyntaxException ignored) {
         }
     }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameLeftEvent> gameLeftEventListener = new Listener<>(event -> {
+    private void gameLeftEventListener(GameLeftEvent event) {
         closeAllServerConnections();
         this.toggle();
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameJoinedEvent> gameJoinedEventListener = new Listener<>(event -> {
+    private void gameJoinedEventListener(GameJoinedEvent event) {
         closeAllServerConnections();
         this.toggle();
-    });
+    }
 
-    private static class SwarmHelpScreen extends WindowScreen {
-
+    private class SwarmHelpScreen extends WindowScreen {
         private final WTable textTable;
         private final WButton introButton;
         private final WButton ipConfigButton;
@@ -399,25 +404,25 @@ public class Swarm extends Module {
             textTable = new WTable();
             introButton = new WButton("(1) Introduction");
             introButton.action = () -> {
-                buildTextTable(swarmGuideIntro);
+                buildTextTable(getSwarmGuideIntro());
                 initWidgets();
             };
             ipConfigButton = new WButton("(2) Configuration");
             ipConfigButton.action = () -> {
-                buildTextTable(swarmGuideConfig);
+                buildTextTable(getSwarmGuideConfig());
                 initWidgets();
             };
             queenButton = new WButton("(3) Queen");
             queenButton.action = () -> {
-                buildTextTable(swarmGuideQueen);
+                buildTextTable(getSwarmGuideQueen());
                 initWidgets();
             };
             slaveButton = new WButton("(4) Slave");
             slaveButton.action = () -> {
-                buildTextTable(swarmGuideSlave);
+                buildTextTable(getSwarmGuideSlave());
                 initWidgets();
             };
-            buildTextTable(swarmGuideIntro);
+            buildTextTable(getSwarmGuideIntro());
             initWidgets();
         }
 
@@ -436,7 +441,7 @@ public class Swarm extends Module {
 
         private void buildTextTable(List<String> text) {
             textTable.clear();
-            for(String s : text){
+            for (String s : text) {
                 textTable.add(new WLabel(s));
                 textTable.row();
             }
@@ -444,51 +449,59 @@ public class Swarm extends Module {
     }
 
     //I know its ugly, I don't care.
-    private final static List<String> swarmGuideIntro = Arrays.asList(
-            "Welcome to Swarm!",
-            "",
-            "Swarm at its heart is a command tunnel which allows a controlling account, referred",
-            "to as the queen account, to control other accounts by means of a background server.",
-            "",
-            "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
-            "same computer however with some additional configuration it will work across your local network",
-            "or the broader internet.",
-            "",
-            "All swarm commands should be proceeded by '.s'"
-    );
+    private List<String> getSwarmGuideIntro() {
+        return Arrays.asList(
+                "Welcome to Swarm!",
+                "",
+                "Swarm at its heart is a command tunnel which allows a controlling account, referred",
+                "to as the queen account, to control other accounts by means of a background server.",
+                "",
+                "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
+                "same computer however with some additional configuration it will work across your local network",
+                "or the broader internet.",
+                "",
+                String.format("All swarm commands should be proceeded by \"%s\"", Commands.get().get(SwarmQueen.class).toString())
+        );
+    }
 
-    private final static List<String> swarmGuideConfig = Arrays.asList(
-            "Localhost Connections:",
-            " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
-            " here if the configured port is not being used for anything else.",
-            "",
-            "Local Connections:",
-            " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
-            " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
-            " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
-            "",
-            "Broad-Internet Connections:",
-            " If you are attempting to make a connection over the broader internet a port forward will be required on the",
-            " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
-            " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
-            " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
-            " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
-            " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
-            " everything correctly, you may now proceed as usual."
-    );
+    private List<String> getSwarmGuideConfig() {
+        return Arrays.asList(
+                "Localhost Connections:",
+                " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
+                " here if the configured port is not being used for anything else.",
+                "",
+                "Local Connections:",
+                " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
+                " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
+                " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
+                "",
+                "Broad-Internet Connections:",
+                " If you are attempting to make a connection over the broader internet a port forward will be required on the",
+                " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
+                " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
+                " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
+                " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
+                " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
+                " everything correctly, you may now proceed as usual."
+        );
+    }
 
-    private final static List<String> swarmGuideQueen = Arrays.asList(
-            "Setting up the Queen:",
-            " Pick an instance of Minecraft to be your queen account.",
-            " Ensure the swarm module is enabled.",
-            " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.",
-            " You may also enter the command .s queen."
-    );
+    private List<String> getSwarmGuideQueen() {
+        return Arrays.asList(
+                "Setting up the Queen:",
+                " Pick an instance of Minecraft to be your queen account.",
+                " Ensure the swarm module is enabled.",
+                " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.", String.format(
+                        " You may also enter the command \"%s\".", Commands.get().get(SwarmQueen.class).toString("queen"))
+        );
+    }
 
-    private final static List<String> swarmGuideSlave = Arrays.asList(
-            "Connecting your slaves:",
-            " For each slave account, assuming you correctly configured the ip and port",
-            " in Step 1 simply press the button labeled 'Connect (S)', or enter the command '.s slave'"
-    );
+    private List<String> getSwarmGuideSlave() {
+        return Arrays.asList(
+                "Connecting your slaves:",
+                " For each slave account, assuming you correctly configured the ip and port", String.format(
+                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", Commands.get().get(SwarmSlave.class).toString("slave"))
+        );
+    }
 
 }

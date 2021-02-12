@@ -1,55 +1,55 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.utils.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.combat.AutoTotem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-public class InvUtils implements Listenable {
+public class InvUtils {
     public static final int OFFHAND_SLOT = 45;
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final FindItemResult findItemResult = new FindItemResult();
-    private static final Deque<Pair<Class<? extends Module>, List<Integer>>> moveQueue = new ArrayDeque<>();
-    private static final Queue<Integer> currentQueue = new PriorityQueue<>();
-    private static Class<? extends Module> currentModule;
-    private static final Map<Class<? extends Module>, Integer> cooldown = new ConcurrentHashMap<>();
+    private static final Deque<CustomPair> moveQueue = new ArrayDeque<>();
+    private static final Queue<Integer> currentQueue = new LinkedList<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
-        assert mc.interactionManager != null;
-        assert mc.player != null;
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
     }
 
-    public static Hand getHand (Item item) {
-        assert mc.player != null;
+    public static Hand getHand(Item item) {
         Hand hand = Hand.MAIN_HAND;
         if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
         return hand;
     }
 
+    public static Hand getHand(Predicate<ItemStack> isGood) {
+        Hand hand = null;
+        if (isGood.test(mc.player.getMainHandStack())) hand = Hand.MAIN_HAND;
+        else if (isGood.test(mc.player.getOffHandStack())) hand = Hand.OFF_HAND;
+
+        return hand;
+    }
+
     public static FindItemResult findItemWithCount(Item item) {
-        assert mc.player != null;
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
@@ -65,26 +65,6 @@ public class InvUtils implements Listenable {
         return findItemResult;
     }
 
-    public static int findItem(Item item, Predicate<ItemStack> isGood) {
-        assert mc.player != null;
-        for (int i = 0; i < mc.player.inventory.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
-        }
-
-        return -1;
-    }
-
-    public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
-        assert mc.player != null;
-        for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
-        }
-
-        return -1;
-    }
-
     public static int invIndexToSlotId(int invIndex) {
         if (invIndex < 9) return 44 - (8 - invIndex);
         return invIndex;
@@ -98,43 +78,51 @@ public class InvUtils implements Listenable {
         }
     }
 
-    @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
-        if (mc.world == null || mc.player == null){
-            cooldown.clear();
+    @EventHandler(priority = EventPriority.LOWEST)
+    private static void onTick(TickEvent.Pre event) {
+        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
             currentQueue.clear();
             moveQueue.clear();
             return;
         }
-        for (Class<? extends Module> klass : cooldown.keySet()){
-            cooldown.replace(klass, cooldown.get(klass) - 1);
-            if (cooldown.get(klass) <= 0) cooldown.remove(klass);
+
+        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() > 44){
+            int slot = mc.player.inventory.getEmptySlot();
+            if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
+            if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
         }
-        if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
-            Pair<Class<? extends Module>, List<Integer>> pair = moveQueue.remove();
-            Collections.reverse(pair.getRight());
-            currentQueue.addAll(pair.getRight());
-            currentModule = pair.getLeft();
-        } else if (!currentQueue.isEmpty()) {
-            currentQueue.forEach(slot -> clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP));
-            currentQueue.clear();
+
+        if (!moveQueue.isEmpty()) {
+            if (currentQueue.isEmpty()) {
+                CustomPair pair = moveQueue.remove();
+                currentQueue.addAll(pair.getRight());
+            }
+
+            if (mc.player.currentScreenHandler.getStacks().size() > 44) {
+                currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
+                currentQueue.clear();
+            }
         }
-    });
+    }
 
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
-        Collections.reverse(slots);
-        if (cooldown.containsKey(klass))return;
-        if (canMove(klass)){
-            moveQueue.addFirst(new Pair<>(klass, slots));
-            currentModule = klass;
-        } else {
-            moveQueue.add(new Pair<>(klass, slots));
+        if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
+
+        if (klass == AutoTotem.class) {
+            moveQueue.removeIf(pair -> pair.getRight().contains(45));
         }
-        cooldown.put(klass, 3);
+
+        if (!moveQueue.isEmpty() && canMove(klass)){
+            moveQueue.addFirst(new CustomPair(klass, slots));
+        } else {
+            moveQueue.add(new CustomPair(klass, slots));
+        }
+
+        onTick(new TickEvent.Pre());
     }
 
     public static boolean canMove(Class<? extends Module> klass){
-        return getPrio(currentModule) < getPrio(klass);
+        return getPrio(moveQueue.peek().getLeft()) < getPrio(klass);
     }
 
     private static int getPrio(Class<? extends Module> klass){
@@ -146,5 +134,56 @@ public class InvUtils implements Listenable {
     @Target(ElementType.TYPE)
     public @interface Priority{
         int priority() default -1;
+    }
+
+    //Whole
+    public static int findItemInAll(Item item) {
+        return findItemInHotbar(item, itemStack -> true);
+    }
+
+    public static int findItemInAll(Item item, Predicate<ItemStack> isGood) {
+        return findItem(item, isGood, mc.player.inventory.size());
+    }
+
+    public static int findItemInAll(Predicate<ItemStack> isGood) {
+        return findItem(null, isGood, mc.player.inventory.size());
+    }
+
+    //Hotbar
+    public static int findItemInHotbar(Item item) {
+        return findItemInHotbar(item, itemStack -> true);
+    }
+
+    public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
+        return findItem(item, isGood, 9);
+    }
+
+    public static int findItemInHotbar(Predicate<ItemStack> isGood) {
+        return findItem(null, isGood, 9);
+    }
+
+    //Main
+    public static int findItemInMain(Item item) {
+        return findItemInHotbar(item, itemStack -> true);
+    }
+
+    public static int findItemInMain(Item item, Predicate<ItemStack> isGood) {
+        return findItem(item, isGood, mc.player.inventory.main.size());
+    }
+
+    public static int findItemInMain(Predicate<ItemStack> isGood) {
+        return findItem(null, isGood, mc.player.inventory.main.size());
+    }
+
+    private static int findItem(Item item, Predicate<ItemStack> isGood, int size) {
+        for (int i = 0; i < size; i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            if ((item == null || itemStack.getItem() == item) && isGood.test(itemStack)) return i;
+        }
+        return -1;
+    }
+
+    public static void swap(int slot) {
+        if (slot != mc.player.inventory.selectedSlot && slot >= 0 && slot < 9) mc.player.inventory.selectedSlot = slot;
     }
 }

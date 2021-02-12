@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
@@ -12,7 +12,6 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.render.RenderUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
@@ -38,13 +37,11 @@ public class InventoryViewerHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(176 * hud.invViewerScale(), 67 * hud.invViewerScale());
+        box.setSize(176 * hud.invViewerScale.get(), 67 * hud.invViewerScale.get());
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         int x = box.getX();
         int y = box.getY();
 
@@ -53,16 +50,14 @@ public class InventoryViewerHud extends HudModule {
         if (mc.player != null) {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
-                    RenderUtils.drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18), hud.invViewerScale(), true);
+                    RenderUtils.drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale.get() + 8 + i * 18), (int) (y / hud.invViewerScale.get() + 7 + row * 18), hud.invViewerScale.get(), true);
                 }
             }
         }
     }
 
     private void drawBackground(int x, int y) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
-        switch(hud.invViewerBackground()) {
+        switch(hud.invViewerBackground.get()) {
             case Light:
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 mc.getTextureManager().bindTexture(TEXTURE_LIGHT);
@@ -85,7 +80,7 @@ public class InventoryViewerHud extends HudModule {
                 break;
             case Flat:
                 Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                Renderer.NORMAL.quad(x, y, box.width, box.height, hud.invViewerColor());
+                Renderer.NORMAL.quad(x, y, box.width, box.height, hud.invViewerColor.get());
                 Renderer.NORMAL.end();
                 break;
         }

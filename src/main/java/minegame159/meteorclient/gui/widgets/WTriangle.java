@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -15,9 +15,9 @@ public class WTriangle extends WPressable {
     public double rotation;
 
     public WTriangle() {
-        color = GuiConfig.INSTANCE.background;
-        colorHovered = GuiConfig.INSTANCE.backgroundHovered;
-        colorPressed = GuiConfig.INSTANCE.backgroundPressed;
+        color = GuiConfig.get().background;
+        colorHovered = GuiConfig.get().backgroundHovered;
+        colorPressed = GuiConfig.get().backgroundPressed;
     }
 
     @Override

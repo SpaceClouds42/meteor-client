@@ -1,14 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.screens.settings.ModuleListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -45,7 +45,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
 
         try {
             for (String value : values) {
-                Module module = ModuleManager.INSTANCE.get(value.trim());
+                Module module = Modules.get().get(value.trim());
                 if (module != null) modules.add(module);
             }
         } catch (Exception ignored) {}
@@ -85,7 +85,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
 
         ListTag valueTag = tag.getList("modules", 8);
         for (Tag tagI : valueTag) {
-            Module module = ModuleManager.INSTANCE.get(tagI.asString());
+            Module module = Modules.get().get(tagI.asString());
             if (module != null) get().add(module);
         }
 

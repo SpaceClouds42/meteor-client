@@ -1,15 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.StatusEffectInstanceAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
@@ -34,18 +33,18 @@ public class PotionSpoof extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         for (StatusEffect statusEffect : potions.get().keySet()) {
             int level = potions.get().getInt(statusEffect);
             if (level <= 0) continue;
 
             if (mc.player.hasStatusEffect(statusEffect)) {
                 StatusEffectInstance instance = mc.player.getStatusEffect(statusEffect);
-                ((IStatusEffectInstance) instance).setAmplifier(level - 1);
-                if (instance.getDuration() < 20) ((IStatusEffectInstance) instance).setDuration(20);
+                ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
+                if (instance.getDuration() < 20) ((StatusEffectInstanceAccessor) instance).setDuration(20);
             } else {
                 mc.player.addStatusEffect(new StatusEffectInstance(statusEffect, 20, level - 1));
             }
         }
-    });
+    }
 }

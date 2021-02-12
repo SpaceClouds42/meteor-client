@@ -38,11 +38,10 @@ axios
           title: "meteor client v" + version + " build #" + build,
           description: description,
           url: "https://meteorclient.com",
-          color: success ? 3066993 : 15158332,
-          thumbnail: {
-            url: "https://meteorclient.com/icon.png"
-          }
+          color: success ? 3066993 : 15158332
         }
       ]
     })
+
+    axios.post("https://meteorclient.com/api/setDevBuild?token=" + process.env.server_token + "&devBuild=" + build)
   })

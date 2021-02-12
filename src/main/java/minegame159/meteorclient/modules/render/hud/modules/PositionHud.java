@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 
 public class PositionHud extends HudModule {
     private final String left1 = "Pos: ";
@@ -25,9 +24,7 @@ public class PositionHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (left1Width == 0) left1Width = renderer.textWidth(left1);
-
-        MinecraftClient mc = MinecraftClient.getInstance();
+        left1Width = renderer.textWidth(left1);
         left2 = null;
 
         if (mc.player == null) {
@@ -70,14 +67,14 @@ public class PositionHud extends HudModule {
         int y = box.getY();
 
         if (left2 != null) {
-            renderer.text(left2, x, y, hud.primaryColor());
-            renderer.text(right2, x + left2Width, y, hud.secondaryColor());
+            renderer.text(left2, x, y, hud.primaryColor.get());
+            renderer.text(right2, x + left2Width, y, hud.secondaryColor.get());
         }
 
         double xOffset = box.alignX(left1Width + renderer.textWidth(right1));
         double yOffset = renderer.textHeight() + 2;
 
-        renderer.text(left1, x + xOffset, y + yOffset, hud.primaryColor());
-        renderer.text(right1, x + xOffset + left1Width, y + yOffset, hud.secondaryColor());
+        renderer.text(left1, x + xOffset, y + yOffset, hud.primaryColor.get());
+        renderer.text(right1, x + xOffset + left1Width, y + yOffset, hud.secondaryColor.get());
     }
 }

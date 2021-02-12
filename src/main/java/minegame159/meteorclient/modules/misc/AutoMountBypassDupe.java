@@ -1,25 +1,24 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 12/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.MountBypass;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
@@ -48,7 +47,7 @@ public class AutoMountBypassDupe extends Module {
             .build());
 
     private final Setting<Boolean> faceDown = sgGeneral.add(new BoolSetting.Builder()
-            .name("face-down")
+            .name("rotate-down")
             .description("Faces down when dropping items.")
             .defaultValue(true)
             .build()
@@ -56,7 +55,7 @@ public class AutoMountBypassDupe extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Time in ticks between actions. 20 ticks = 1 second.")
+            .description("The delay in ticks between actions.")
             .defaultValue(4)
             .min(0)
             .build()
@@ -79,16 +78,15 @@ public class AutoMountBypassDupe extends Module {
         timer = 0;
     }
 
-
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (noCancel) return;
 
-        ModuleManager.INSTANCE.get(MountBypass.class).onSendPacket(event);
-    });
+        Modules.get().get(MountBypass.class).onSendPacket(event);
+    }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (GLFW.glfwGetKey(mc.getWindow().getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
             toggle();
             mc.player.closeHandledScreen();
@@ -126,7 +124,7 @@ public class AutoMountBypassDupe extends Module {
                 if (slot != -1 && slot < 9) {
                     mc.player.inventory.selectedSlot  = slot;
                  } else {
-                    Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
+                    ChatUtils.moduleError(this, "Cannot find chest in your hotbar... disabling.");
                     this.toggle();
                 }
             }
@@ -186,7 +184,7 @@ public class AutoMountBypassDupe extends Module {
                 slotsToMove.clear();
             }
         }
-    });
+    }
 
     private int getInvSize(Entity e){
         if (!(e instanceof AbstractDonkeyEntity)) return -1;

@@ -1,14 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -22,7 +22,6 @@ public class PotionTimersHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             box.setSize(renderer.textWidth("Potion Timers 0:00"), renderer.textHeight());
             return;
@@ -48,7 +47,6 @@ public class PotionTimersHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             renderer.text("Potion Timers 0:00", x, y, color);
             return;
@@ -74,6 +72,6 @@ public class PotionTimersHud extends HudModule {
     }
 
     private String getString(StatusEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", statusEffectInstance.getEffectType().getName().getString(), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.durationToString(statusEffectInstance, 1));
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.durationToString(statusEffectInstance, 1));
     }
 }

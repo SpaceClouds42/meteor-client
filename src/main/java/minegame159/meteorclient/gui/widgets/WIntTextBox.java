@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -11,7 +11,8 @@ public class WIntTextBox extends WTextBox {
     public WIntTextBox(int value, double width) {
         super(Integer.toString(value), width);
 
-        this.value = value;
+        this.value = value - 1;
+        setValue(value);
     }
 
     @Override

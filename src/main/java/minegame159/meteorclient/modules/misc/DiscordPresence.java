@@ -1,20 +1,18 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-//Hand crafted by seesnale ez
+//Created by squidoodly
 
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
@@ -23,7 +21,6 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Utils;
 
 public class DiscordPresence extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
@@ -53,33 +50,29 @@ public class DiscordPresence extends Module {
 
     @Override
     public void onActivate() {
-        DiscordEventHandlers eventHandlers = new DiscordEventHandlers();
-        eventHandlers.disconnected = ((var1, var2) -> MeteorClient.LOG.info("Discord RPC disconnected, var1: " + var1 + ", var2: " + var2));
-
-        instance.Discord_Initialize("709793491911180378", eventHandlers, true, null);
+        DiscordEventHandlers handlers = new DiscordEventHandlers();
+        instance.Discord_Initialize("709793491911180378", handlers, true, null);
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
-
-        String largeText = "Meteor Client " + Config.INSTANCE.version.getOriginalString();
-        if (!Config.INSTANCE.devBuild.isEmpty()) largeText += " Dev Build: " + Config.INSTANCE.devBuild;
-
+        String largeText = "Meteor Client " + Config.get().version.getOriginalString();
+        if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
         rpc.largeImageText = largeText;
-        rpc.details = getLine(line1);
-        rpc.state = getLine(line2);
         currentSmallImage = SmallImage.MineGame;
+        updateDetails();
 
         instance.Discord_UpdatePresence(rpc);
+        instance.Discord_RunCallbacks();
     }
 
     @Override
     public void onDeactivate() {
-        instance.Discord_Shutdown();
         instance.Discord_ClearPresence();
+        instance.Discord_Shutdown();
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (!Utils.canUpdate()) return;
         ticks++;
 
@@ -91,10 +84,9 @@ public class DiscordPresence extends Module {
             ticks = 0;
         }
 
-        instance.Discord_RunCallbacks();
-
         updateDetails();
-    });
+        instance.Discord_RunCallbacks();
+    }
 
     private String getLine(Setting<String> line) {
         if (line.get().length() > 0) return line.get().replace("{player}", getName()).replace("{server}", getServer());
@@ -111,7 +103,7 @@ public class DiscordPresence extends Module {
     }
 
     private void updateDetails() {
-        if (isActive() && mc.player != null && mc.world != null) {
+        if (isActive() && Utils.canUpdate()) {
             rpc.details = getLine(line1);
             rpc.state = getLine(line2);
             instance.Discord_UpdatePresence(rpc);

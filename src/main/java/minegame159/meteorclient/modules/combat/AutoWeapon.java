@@ -1,14 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 15/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -52,9 +51,9 @@ public class AutoWeapon extends Module {
     );
 
     @EventHandler
-    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
-            mc.player.inventory.selectedSlot = getBestWeapon();
-    });
+    private void onAttack(AttackEntityEvent event) {
+        mc.player.inventory.selectedSlot = getBestWeapon();
+    }
 
     private int getBestWeapon(){
         int slotS = mc.player.inventory.selectedSlot;

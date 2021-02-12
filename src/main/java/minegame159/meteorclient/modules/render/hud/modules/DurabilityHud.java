@@ -1,12 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.client.MinecraftClient;
 
 public class DurabilityHud extends DoubleTextHudModule {
     public DurabilityHud(HUD hud) {
@@ -15,7 +14,6 @@ public class DurabilityHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return "";
 
         Integer amount = null;

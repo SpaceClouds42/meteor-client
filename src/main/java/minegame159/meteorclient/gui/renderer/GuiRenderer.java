@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.renderer;
@@ -10,9 +10,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.MyFont;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.utils.misc.CursorStyle;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.misc.input.Input;
@@ -22,7 +21,6 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "newgui.png");
+    private static final Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
 
     private final MeshBuilder mb = new MeshBuilder();
 
@@ -44,17 +42,26 @@ public class GuiRenderer {
 
     public String tooltip;
 
-    private MyFont font;
     private CursorStyle cursorStyle;
 
     public GuiRenderer() {
         mb.texture = true;
     }
 
+    public void beginFontScale() {
+        TextRenderer.get().begin(GuiConfig.get().guiScale, true, false);
+    }
+
+    public void endFontScale() {
+        TextRenderer.get().end();
+    }
+
     public void begin(boolean root) {
         mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (root) {
+            beginFontScale();
+
             Window window = MinecraftClient.getInstance().getWindow();
             beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
 
@@ -73,40 +80,42 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
-        Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
+        boolean a = TextRenderer.get().isBuilding();
+        if (a) endFontScale();
+        TextRenderer.get().begin(GuiConfig.get().guiScale);
         for (Text text : texts) {
             if (!text.title) {
                 text.render();
                 textPool.free(text);
             }
         }
-        this.font.end();
+        TextRenderer.get().end();
 
-        MyFont tooltipFont = this.font;
-
-        font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
+        TextRenderer.get().begin(1.22222222 * GuiConfig.get().guiScale);
         for (Text text : texts) {
             if (text.title) {
                 text.render();
                 textPool.free(text);
             }
         }
-        this.font.end();
+        TextRenderer.get().end();
         texts.clear();
+        if (a) beginFontScale();
 
         if (root) {
+            endFontScale();
+
             if (tooltipWidth > 0) {
                 mb.texture = false;
                 mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
+                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.get().background);
                 mb.end();
                 mb.texture = true;
 
-                tooltipFont.render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                TextRenderer.get().begin(GuiConfig.get().guiScale);
+                TextRenderer.get().render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.get().text);
+                TextRenderer.get().end();
+
                 tooltip = null;
             }
 
@@ -180,15 +189,15 @@ public class GuiRenderer {
     }
 
     public void background(WWidget widget, boolean hovered, boolean pressed) {
-        Color background = GuiConfig.INSTANCE.background;
-        Color outline = GuiConfig.INSTANCE.outline;
+        Color background = GuiConfig.get().background;
+        Color outline = GuiConfig.get().outline;
 
         if (pressed) {
-            background = GuiConfig.INSTANCE.backgroundPressed;
-            outline = GuiConfig.INSTANCE.outlinePressed;
+            background = GuiConfig.get().backgroundPressed;
+            outline = GuiConfig.get().outlinePressed;
         } else if (hovered) {
-            background = GuiConfig.INSTANCE.backgroundHovered;
-            outline = GuiConfig.INSTANCE.outlineHovered;
+            background = GuiConfig.get().backgroundHovered;
+            outline = GuiConfig.get().outlineHovered;
         }
 
         quad(Region.FULL, widget.x, widget.y, widget.width, widget.height, background);
@@ -227,23 +236,23 @@ public class GuiRenderer {
         texts.add(textPool.get().set(text, x, y, shadow, color, false));
     }
     public double textWidth(String text, int length) {
-        return Fonts.get().getWidth(text, length) * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text, length);
     }
     public double textWidth(String text) {
-        return Fonts.get().getWidth(text) * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text);
     }
     public double textHeight() {
-        return Fonts.get().getHeight() * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getHeight();
     }
 
     public void title(String text, double x, double y, Color color) {
         texts.add(textPool.get().set(text, x, y, false, color, true));
     }
     public double titleWidth(String text) {
-        return Fonts.get().getWidth(text) * 1.22222222 * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text) * 1.22222222;
     }
     public double titleHeight() {
-        return Fonts.get().getHeight() * 1.22222222 * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getHeight() * 1.22222222;
     }
 
     public void post(Runnable task) {
@@ -298,7 +307,7 @@ public class GuiRenderer {
         }
     }
 
-    private class Text {
+    private static class Text {
         public String text;
         public double x, y;
         public boolean shadow;
@@ -317,7 +326,7 @@ public class GuiRenderer {
         }
 
         public void render() {
-            font.render(text, x, y, color);
+            TextRenderer.get().render(text, x, y, color, true);
         }
     }
 }

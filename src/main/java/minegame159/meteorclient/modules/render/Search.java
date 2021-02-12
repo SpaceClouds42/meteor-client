@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
@@ -8,12 +8,10 @@ package minegame159.meteorclient.modules.render;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.EventStore;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -130,7 +128,9 @@ public class Search extends Module {
     }
 
     @EventHandler
-    private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
+    private void onChunkData(ChunkDataEvent event) {
+        searchChunk(event.chunk, event);
+    }
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
         MeteorExecutor.execute(() -> {
@@ -151,7 +151,7 @@ public class Search extends Module {
                 if (myChunk.blocks.size() > 0) chunks.put(chunk.getPos().toLong(), myChunk);
             }
 
-            if (event != null) EventStore.returnChunkDataEvent(event);
+            if (event != null) ChunkDataEvent.returnChunkDataEvent(event);
         });
     }
 
@@ -173,7 +173,7 @@ public class Search extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lastDimension != mc.world.getDimension()) {
             synchronized (chunks) {
                 for (MyChunk chunk : chunks.values()) chunk.dispose();
@@ -190,11 +190,10 @@ public class Search extends Module {
         }
 
         lastDimension = mc.world.getDimension();
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-
+    private void onRender(RenderEvent event) {
         synchronized (chunks) {
             toRemove.clear();
             
@@ -208,7 +207,7 @@ public class Search extends Module {
                 chunks.remove(key);
             }
         }
-    });
+    }
 
     private void addToUpdate(int x, int z) {
         long key = ChunkPos.toLong(x, z);

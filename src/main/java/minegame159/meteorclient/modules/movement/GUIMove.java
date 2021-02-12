@@ -1,18 +1,17 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.mixininterface.ICreativeInventoryScreen;
+import minegame159.meteorclient.mixin.CreativeInventoryScreenAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -23,7 +22,6 @@ import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
 public class GUIMove extends Module {
-
     public enum Screens {
         GUI,
         Inventory,
@@ -33,8 +31,8 @@ public class GUIMove extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Screens> screens = sgGeneral.add(new EnumSetting.Builder<Screens>()
-            .name("screens")
-            .description("Which screens to move in.")
+            .name("gUIs")
+            .description("Which GUIs to move in.")
             .defaultValue(Screens.Inventory)
             .build()
     );
@@ -62,7 +60,7 @@ public class GUIMove extends Module {
 
     private final Setting<Boolean> arrowsRotate = sgGeneral.add(new BoolSetting.Builder()
             .name("arrows-rotate")
-            .description("Allows you to use arrow keys to rotate while in GUIs.")
+            .description("Allows you to use your arrow keys to rotate while in GUIs.")
             .defaultValue(true)
             .build()
     );
@@ -80,7 +78,7 @@ public class GUIMove extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (!skip()) {
             switch (screens.get()) {
                 case GUI:
@@ -94,7 +92,7 @@ public class GUIMove extends Module {
                     break;
             }
         }
-    });
+    }
 
     public void tick() {
         if (!isActive() || skip()) return;
@@ -125,10 +123,12 @@ public class GUIMove extends Module {
         tickSneakJumpAndSprint();
 
         if (arrowsRotate.get()) {
-            if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += rotateSpeed.get();
-            if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= rotateSpeed.get();
-            if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= rotateSpeed.get();
-            if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += rotateSpeed.get();
+            for (int i = 0; i < (rotateSpeed.get() * 2); i++) {
+                if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
+                if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
+                if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
+                if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
+            }
 
             mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
         }
@@ -141,6 +141,6 @@ public class GUIMove extends Module {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
+        return mc.currentScreen == null || Modules.get().isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((CreativeInventoryScreenAccessor) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
     }
 }

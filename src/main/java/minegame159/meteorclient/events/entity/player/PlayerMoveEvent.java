@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.events.entity.player;
@@ -9,6 +9,14 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 
 public class PlayerMoveEvent {
+    private static final PlayerMoveEvent INSTANCE = new PlayerMoveEvent();
+
     public MovementType type;
     public Vec3d movement;
+
+    public static PlayerMoveEvent get(MovementType type, Vec3d movement) {
+        INSTANCE.type = type;
+        INSTANCE.movement = movement;
+        return INSTANCE;
+    }
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.commands.commands;
@@ -20,9 +20,7 @@ public class Dismount extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            //if (MC.player.hasVehicle()) {
-            MC.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(0, 0, false, true));
-            //}
+            mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(0, 0, false, true));
             return SINGLE_SUCCESS;
         });
     }

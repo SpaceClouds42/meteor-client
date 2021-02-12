@@ -1,24 +1,22 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
 //Created by squidoodly 06/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -62,10 +60,10 @@ public class MiddleClickExtra extends Module {
     private boolean wasUsing = false;
     private int preSlot;
     private int preCount;
-    private InvUtils.FindItemResult result;
 
     @EventHandler
-    private final Listener<MiddleMouseButtonEvent> onMiddleMouse = new Listener<>(event -> {
+    private void onMiddleMouse(MiddleMouseButtonEvent event) {
+        InvUtils.FindItemResult result;
         switch(mode.get()){
             case Pearl: {
                 result = InvUtils.findItemWithCount(Items.ENDER_PEARL);
@@ -75,7 +73,7 @@ public class MiddleClickExtra extends Module {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
                 } else if (notify.get()) {
-                    Chat.error(this, "Unable to find specified item.");
+                    ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
             }case Gap: {
@@ -84,10 +82,10 @@ public class MiddleClickExtra extends Module {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
-                    ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                    mc.options.keyUse.setPressed(true);
                     wasUsing = true;
                 } else if(notify.get()) {
-                    Chat.error(this, "Unable to find specified item.");
+                    ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
             }case EGap:{
@@ -96,10 +94,10 @@ public class MiddleClickExtra extends Module {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
-                    ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                    mc.options.keyUse.setPressed(true);
                     wasUsing = true;
                 } else if(notify.get()) {
-                    Chat.error(this, "Unable to find selected item.");
+                    ChatUtils.moduleWarning(this, "Unable to find selected item.");
                 }
                 break;
             }case Bow:{
@@ -111,7 +109,7 @@ public class MiddleClickExtra extends Module {
                     preCount = result.count;
                     wasUsing = true;
                 } else if(notify.get()) {
-                    Chat.error(this, "Unable to find specified item.");
+                    ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
             }case Rod: {
@@ -121,23 +119,23 @@ public class MiddleClickExtra extends Module {
                     mc.player.inventory.selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                 } else if (notify.get()) {
-                    Chat.error(this, "Unable to find specified item.");
+                    ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
             }
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if(!wasUsing) return;
-        if(preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item
-                && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
-            ((IKeyBinding) mc.options.keyUse).setPressed(false);
+    private void onTick(TickEvent.Post event) {
+        if (!wasUsing) return;
+
+        if (preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
+            mc.options.keyUse.setPressed(false);
             mc.player.inventory.selectedSlot = preSlot;
             wasUsing = false;
         } else {
-            ((IKeyBinding) mc.options.keyUse).setPressed(true);
+            mc.options.keyUse.setPressed(true);
         }
-    });
+    }
 }

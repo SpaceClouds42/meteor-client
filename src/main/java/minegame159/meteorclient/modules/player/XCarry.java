@@ -1,14 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.mixininterface.ICloseHandledScreenC2SPacket;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixin.CloseHandledScreenC2SPacketAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -27,16 +26,18 @@ public class XCarry extends Module {
 
     @Override
     public void onDeactivate() {
-        if (invOpened) mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+        if (invOpened) {
+            mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+        }
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof CloseHandledScreenC2SPacket)) return;
 
-        if (((ICloseHandledScreenC2SPacket) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
+        if (((CloseHandledScreenC2SPacketAccessor) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
             event.cancel();
         }
-    });
+    }
 }

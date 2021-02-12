@@ -1,9 +1,13 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.StatusEffectInstanceAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -23,6 +27,7 @@ public class SpeedMine extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .defaultValue(Mode.Normal)
@@ -43,20 +48,20 @@ public class SpeedMine extends Module {
     }
 
     @EventHandler
-    public final Listener<PostTickEvent> onTick = new Listener<>(e -> {
+    public void onTick(TickEvent.Post event) {
         Mode mode = this.mode.get();
 
         if (mode == Mode.Haste1 || mode == Mode.Haste2) {
             int amplifier = mode == Mode.Haste2 ? 1 : 0;
             if (mc.player.hasStatusEffect(HASTE)) {
                 StatusEffectInstance effect = mc.player.getStatusEffect(HASTE);
-                ((IStatusEffectInstance) effect).setAmplifier(amplifier);
+                ((StatusEffectInstanceAccessor) effect).setAmplifier(amplifier);
                 if (effect.getDuration() < 20) {
-                    ((IStatusEffectInstance) effect).setDuration(20);
+                    ((StatusEffectInstanceAccessor) effect).setDuration(20);
                 }
             } else {
                 mc.player.addStatusEffect(new StatusEffectInstance(HASTE, 20, amplifier, false, false, false));
             }
         }
-    });
+    }
 }

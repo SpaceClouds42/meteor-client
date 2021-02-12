@@ -1,19 +1,21 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -23,23 +25,18 @@ import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Tracers extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .build()
     );
 
@@ -52,10 +49,10 @@ public class Tracers extends Module {
 
     // Appearance
 
-    private final Setting<RenderUtils.TracerTarget> target = sgAppearance.add(new EnumSetting.Builder<RenderUtils.TracerTarget>()
+    private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
             .name("target")
             .description("What part of the entity to target.")
-            .defaultValue(RenderUtils.TracerTarget.Body)
+            .defaultValue(Target.Body)
             .build()
     );
 
@@ -66,7 +63,21 @@ public class Tracers extends Module {
             .build()
     );
 
+    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-invisible")
+            .description("Shows invisibile entities.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Colors
+
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the tracer color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
@@ -124,40 +135,28 @@ public class Tracers extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
 
-            if (entity instanceof PlayerEntity) {
-                Color color = playersColor.get();
-                Friend friend = FriendManager.INSTANCE.get((PlayerEntity) entity);
-                if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
-
-                if (friend == null || FriendManager.INSTANCE.show((PlayerEntity) entity)) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
-            } else {
-                switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE: RenderUtils.drawTracerToEntity(event, entity, animalsColor.get(), target.get(), stem.get()); count++; break;
-                    case WATER_CREATURE: RenderUtils.drawTracerToEntity(event, entity, waterAnimalsColor.get(), target.get(), stem.get()); count++; break;
-                    case MONSTER: RenderUtils.drawTracerToEntity(event, entity, monstersColor.get(), target.get(), stem.get()); count++; break;
-                    case AMBIENT: RenderUtils.drawTracerToEntity(event, entity, ambientColor.get(), target.get(), stem.get()); count++; break;
-                    case MISC: RenderUtils.drawTracerToEntity(event, entity, miscColor.get(), target.get(), stem.get()); count++; break;
-                }
-            }
+            Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());
+            count++;
         }
 
         if (storage.get()) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 if (blockEntity.isRemoved()) continue;
-
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
                     RenderUtils.drawTracerToBlockEntity(blockEntity, storageColor.get(), event);
                     count++;
                 }
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

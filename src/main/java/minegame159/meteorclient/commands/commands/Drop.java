@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.commands.commands;
@@ -67,7 +67,7 @@ public class Drop extends Command {
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {
-        ClientPlayerEntity player = MC.player;
+        ClientPlayerEntity player = mc.player;
         assert player != null;
 
         if (player.isSpectator()) throw NOT_SPECTATOR.create();

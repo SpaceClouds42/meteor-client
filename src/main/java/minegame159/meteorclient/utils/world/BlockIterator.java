@@ -1,13 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.utils.world;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.block.BlockState;
@@ -29,10 +30,11 @@ public class BlockIterator {
     private static boolean disableCurrent;
 
     public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(onTick);
+        MeteorClient.EVENT_BUS.subscribe(BlockIterator.class);
     }
 
-    private static final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.LOWEST - 1)
+    private static void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
         MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -70,7 +72,7 @@ public class BlockIterator {
 
         for (Callback callback : callbacks) callbackPool.free(callback);
         callbacks.clear();
-    });
+    }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
         hRadius = Math.max(hRadius, horizontalRadius);

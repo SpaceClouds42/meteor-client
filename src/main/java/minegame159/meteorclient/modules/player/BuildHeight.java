@@ -1,14 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.mixininterface.IBlockHitResult;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixin.BlockHitResultAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -20,12 +19,12 @@ public class BuildHeight extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket)) return;
 
         PlayerInteractBlockC2SPacket p = (PlayerInteractBlockC2SPacket) event.packet;
         if (p.getBlockHitResult().getPos().y >= 255 && p.getBlockHitResult().getSide() == Direction.UP) {
-            ((IBlockHitResult) p.getBlockHitResult()).setSide(Direction.DOWN);
+            ((BlockHitResultAccessor) p.getBlockHitResult()).setSide(Direction.DOWN);
         }
-    });
+    }
 }

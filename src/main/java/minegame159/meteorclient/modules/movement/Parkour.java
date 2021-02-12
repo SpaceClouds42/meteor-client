@@ -1,13 +1,12 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.util.math.Box;
@@ -21,7 +20,7 @@ public class Parkour extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if(!mc.player.isOnGround() || mc.options.keyJump.isPressed()) return;
 
         if(mc.player.isSneaking() || mc.options.keySneak.isPressed()) return;
@@ -34,5 +33,5 @@ public class Parkour extends Module {
         if(blockCollisions.findAny().isPresent()) return;
 
         mc.player.jump();
-    });
+    }
 }

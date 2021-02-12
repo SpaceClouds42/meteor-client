@@ -1,15 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -50,7 +49,7 @@ public class AntiHunger extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (ignorePacket) return;
 
         if (event.packet instanceof ClientCommandC2SPacket && sprint.get()) {
@@ -62,12 +61,12 @@ public class AntiHunger extends Module {
         }
 
         if (event.packet instanceof PlayerMoveC2SPacket && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
-            ((IPlayerMoveC2SPacket) event.packet).setOnGround(false);
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(false);
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
 
         if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {
@@ -79,5 +78,5 @@ public class AntiHunger extends Module {
         }
 
         lastOnGround = mc.player.isOnGround();
-    });
+    }
 }

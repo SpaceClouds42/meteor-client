@@ -1,20 +1,19 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -46,6 +45,13 @@ public class StorageESP extends Module {
             .name("chest")
             .description("The color of chests.")
             .defaultValue(new SettingColor(255, 160, 0, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> trappedChest = sgGeneral.add(new ColorSetting.Builder()
+            .name("trapped-chest")
+            .description("The color of trapped chests.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
     );
 
@@ -100,7 +106,8 @@ public class StorageESP extends Module {
 
         if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
-        if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
+        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
+        else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
@@ -117,7 +124,7 @@ public class StorageESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
@@ -153,7 +160,7 @@ public class StorageESP extends Module {
                     if (Dir.is(excludeDir, Dir.SOUTH)) z2 -= a;
                 }
 
-                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 1, blockEntity.getPos().getY() + 1, blockEntity.getPos().getZ() + 1);
+                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
                 double a = 1;
                 if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -173,7 +180,7 @@ public class StorageESP extends Module {
                 count++;
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

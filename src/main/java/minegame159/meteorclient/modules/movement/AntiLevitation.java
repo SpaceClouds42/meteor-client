@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
@@ -15,8 +15,8 @@ public class AntiLevitation extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
-            .name("apply-gravity")
-            .description("Apply gravity.")
+            .name("gravity")
+            .description("Applies gravity.")
             .defaultValue(false)
             .build()
     );

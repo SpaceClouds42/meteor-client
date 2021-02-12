@@ -1,22 +1,21 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 06/07/2020 AT FUCKING 12:00AM KILL ME
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.TextHandlerAccessor;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
@@ -129,7 +128,7 @@ public class BookBot extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         // Make sure we aren't in the inventory.
         if(mc.currentScreen instanceof HandledScreen<?>) return;
         // If there are no books left to write we are done.
@@ -179,7 +178,7 @@ public class BookBot extends Module {
 
                 // Check to see if the file exists.
                 if (!file.exists()) {
-                    Chat.error(this, "The file you specified doesn't exist in the meteor folder."); // You dumb bitch.
+                    ChatUtils.moduleError(this, "The file you specified doesn't exist in the meteor folder."); // You dumb bitch.
                     return;
                 }
 
@@ -202,7 +201,7 @@ public class BookBot extends Module {
                     writeBook();
                 } catch (IOException ignored) { //EZ ignore. > 1 blocked message.
                     // If it fails then send a message.
-                    Chat.error(this, "Failed to read the file.");
+                    ChatUtils.moduleError(this, "Failed to read the file.");
                     //When you try your best but you don't succeed.
                 }
             } else {
@@ -214,7 +213,7 @@ public class BookBot extends Module {
                 }
             }
         }
-    });
+    }
 
     private void writeBook() {
         pages.clear();
@@ -234,7 +233,7 @@ public class BookBot extends Module {
                 boolean endOfStream2 = false;
 
                 while (true) {
-                    float charWidth = ((ITextHandler) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
+                    float charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
                     if (nextChar == '\n') {
                         if (!readChar()) endOfStream2 = true;
                         break;

@@ -1,14 +1,16 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.Quiver;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class NoRotate extends Module {
 
@@ -17,11 +19,10 @@ public class NoRotate extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            if (ModuleManager.INSTANCE.get(EXPThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
-            ((IPlayerMoveC2SPacket) event.packet).setPitch(mc.player.getPitch(0));
-            ((IPlayerMoveC2SPacket) event.packet).setYaw(mc.player.getYaw(1));
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerPositionLookS2CPacket) {
+            ((PlayerPositionLookS2CPacketAccessor) event.packet).setPitch(mc.player.pitch);
+            ((PlayerPositionLookS2CPacketAccessor) event.packet).setYaw(mc.player.yaw);
         }
-    });
+    }
 }

@@ -1,15 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -45,7 +44,7 @@ public class Step extends Module {
     );
 
     private final Setting<Boolean> safeStep = sgGeneral.add(new BoolSetting.Builder()
-            .name("Safe-step")
+            .name("safe-step")
             .description("Doesn't let you step out of a hole if you are low on health or there is a crystal nearby.")
             .defaultValue(false)
             .build()
@@ -64,7 +63,7 @@ public class Step extends Module {
     private boolean prevBaritoneAssumeStep;
 
     public Step() {
-        super(Category.Movement, "step", "Allows you to walk up full blocks normally.");
+        super(Category.Movement, "step", "Allows you to walk up full blocks instantly.");
     }
 
     @Override
@@ -77,8 +76,7 @@ public class Step extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        assert mc.player != null;
+    private void onTick(TickEvent.Post event) {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
         if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
@@ -87,7 +85,7 @@ public class Step extends Module {
             mc.player.stepHeight = prevStepHeight;
         }
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
-    });
+    }
 
     @Override
     public void onDeactivate() {

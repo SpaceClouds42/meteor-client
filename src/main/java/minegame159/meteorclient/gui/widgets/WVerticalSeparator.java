@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -18,6 +18,6 @@ public class WVerticalSeparator extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.quad(Region.FULL, x, y, width, height, GuiConfig.INSTANCE.separator);
+        renderer.quad(Region.FULL, x, y, width, height, GuiConfig.get().separator);
     }
 }

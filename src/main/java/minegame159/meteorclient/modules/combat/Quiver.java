@@ -1,22 +1,25 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.screen.slot.SlotActionType;
 
@@ -34,7 +37,7 @@ public class Quiver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
+            .name("charge-delay")
             .description("The amount of delay for bow charging in ticks.")
             .defaultValue(6)
             .min(5)
@@ -53,7 +56,7 @@ public class Quiver extends Module {
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Sends you information about the module.")
+            .description("Sends you information about the module when toggled.")
             .defaultValue(true)
             .build()
     );
@@ -99,7 +102,7 @@ public class Quiver extends Module {
         int bowSlot = findBow();
 
         if (bowSlot == -1) {
-            if (chatInfo.get()) Chat.error(this, "No bow found… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleError(this, "No bow found... disabling.");
             toggle();
             return;
         } else mc.player.inventory.selectedSlot = bowSlot;
@@ -119,7 +122,7 @@ public class Quiver extends Module {
         if (speedSlot != -1) arrowsToShoot++;
 
         if (arrowsToShoot == 0) {
-            if (chatInfo.get()) Chat.error(this, "No appropriate arrows found… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleError(this, "No appropriate arrows found... disabling.");
             toggle();
             return;
         }
@@ -136,9 +139,8 @@ public class Quiver extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
+    private void onTick(TickEvent.Post event) {
+        RotationUtils.packetRotate(mc.player.yaw, -90);
 
         boolean canStop = false;
 
@@ -149,7 +151,7 @@ public class Quiver extends Module {
         }
 
         if (shotStrength && shotSpeed && canStop) {
-            if (chatInfo.get()) Chat.info(this, "Quiver complete… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quiver complete... disabling.");
             toggle();
             return;
         }
@@ -158,19 +160,18 @@ public class Quiver extends Module {
             if (!shooting && !shotStrength && foundStrength) {
                 shoot(strengthSlot);
                 shootingArrow = ArrowType.Strength;
-                if (chatInfo.get()) Chat.info(this, "Quivering a strength arrow.");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a strength arrow.");
                 shotStrength = true;
             }
 
             if (!shooting && !shotSpeed && foundSpeed && shotStrength) {
                 shoot(speedSlot);
                 shootingArrow = ArrowType.Speed;
-                if (chatInfo.get()) Chat.info(this, "Quivering a speed arrow.");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
-
         }
-    });
+    }
 
     private void shoot(int moveSlot) {
         if (moveSlot != 9) moveItems(moveSlot, 9);
@@ -222,7 +223,7 @@ public class Quiver extends Module {
     }
 
     private void setPressed(boolean pressed) {
-        ((IKeyBinding) mc.options.keyUse).setPressed(pressed);
+        mc.options.keyUse.setPressed(pressed);
     }
 
     private void moveItems(int from, int to) {

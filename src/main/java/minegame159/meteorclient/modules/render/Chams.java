@@ -1,35 +1,34 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
 
-import minegame159.meteorclient.friends.FriendManager;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.entity.RenderLivingEntityEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.util.math.MatrixStack;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.lwjgl.opengl.GL11;
 
 public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
     
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Select entities to show through walls.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .build()
     );
 
@@ -43,13 +42,18 @@ public class Chams extends Module {
     private final Setting<Boolean> colored = sgGeneral.add(new BoolSetting.Builder()
             .name("colored")
             .description("Renders entity models with a custom color.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
     // Colors
 
-    private final SettingGroup sgColors = settings.createGroup("Colors");
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the chams color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -97,37 +101,30 @@ public class Chams extends Module {
         super(Category.Render, "chams", "Renders entities through walls.");
     }
 
-    public boolean ignoreRender(Entity entity) {
-        return !isActive() || !entities.get().contains(entity.getType());
+    public boolean shouldRender(Entity entity) {
+        return isActive() && entities.get().getBoolean(entity.getType());
     }
 
-    public boolean renderChams(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, LivingEntity entity) {
-        if (ignoreRender(entity) || !colored.get()) return false;
-        Color color = getColor(entity);
-        model.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
-        return true;
-    }
-
-    // TODO: 30/12/2020 Fix crystal chams
-
-//    public boolean renderChamsCrystal(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-//        if (!isActive() || !entities.get().contains(EntityType.END_CRYSTAL) || !colored.get()) return false;
-//        Color color = miscColor.get();
-//        modelPart.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
-//        return true;
-//    }
-
-    public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), true);
-
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animalsColor.get();
-            case WATER_CREATURE: return waterAnimalsColor.get();
-            case MONSTER:        return monstersColor.get();
-            case AMBIENT:        return ambientColor.get();
-            case MISC:           return miscColor.get();
+    @EventHandler
+    private void onPreRender(RenderLivingEntityEvent.Pre event) {
+        if(shouldRender(event.entity) && throughWalls.get()) {
+            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glPolygonOffset(1.0f, -1000000.0f);
         }
+    }
 
-        return Utils.WHITE;
+    @EventHandler
+    private void onPostRender(RenderLivingEntityEvent.Post event) {
+        if(shouldRender(event.entity) && throughWalls.get()) {
+            GL11.glPolygonOffset(1.0f, 1000000.0f);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+        }
+    }
+
+    @EventHandler
+    private void onInvokeRender(RenderLivingEntityEvent.Invoke event) {
+        if (shouldRender(event.entity) && colored.get()) event.setCancelled(true);
+        Color color = EntityUtils.getEntityColor(event.entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+        event.model.render(event.matrices, event.vertices, event.light, event.overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
     }
 }

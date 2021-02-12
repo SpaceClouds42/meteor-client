@@ -1,34 +1,32 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class EntityLogger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -51,19 +49,19 @@ public class EntityLogger extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+    private void onEntityAdded(EntityAddedEvent event) {
         if (event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if (entities.get().contains(event.entity.getType())) {
+        if (entities.get().getBoolean(event.entity.getType())) {
             if (event.entity instanceof PlayerEntity) {
-                if (!friends.get() && FriendManager.INSTANCE.get((PlayerEntity) event.entity) != null) return;
+                if (!friends.get() && Friends.get().get((PlayerEntity) event.entity) != null) return;
             }
 
             String name;
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
             else name = event.entity.getType().getName().getString();
 
-            Chat.info(this, "(highlight)%s (default)has spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
+            ChatUtils.moduleInfo(this, "(highlight)%s (default)has spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
         }
-    });
+    }
 }

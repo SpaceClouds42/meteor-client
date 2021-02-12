@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -23,8 +23,8 @@ public class WTexture extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        super.width = width * 2 * GuiConfig.INSTANCE.guiScale;
-        super.height = height * 2 * GuiConfig.INSTANCE.guiScale;
+        super.width = width * 2 * GuiConfig.get().guiScale;
+        super.height = height * 2 * GuiConfig.get().guiScale;
     }
 
     @Override

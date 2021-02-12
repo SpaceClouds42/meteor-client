@@ -1,26 +1,26 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 
 public class WModuleCategory extends WWindow {
     public WModuleCategory(Category category) {
-        super(category.toString(), GuiConfig.INSTANCE.getWindowConfig(get(category)).isExpanded(), true);
+        super(category.toString(), GuiConfig.get().getWindowConfig(get(category)).isExpanded(), true);
         type = get(category);
 
-        action = () -> GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
+        action = () -> GuiConfig.get().getWindowConfig(type).setPos(x, y);
 
         pad(0);
         getDefaultCell().space(0);
 
-        for (Module module : ModuleManager.INSTANCE.getGroup(category)) {
+        for (Module module : Modules.get().getGroup(category)) {
             add(new WModule(module)).fillX().expandX();
             row();
         }

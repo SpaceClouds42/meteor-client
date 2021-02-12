@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -77,7 +77,7 @@ public class WView extends WTable {
     @Override
     protected boolean onMouseScrolled(double amount) {
         if (hasScrollBar && (!onlyWhenMouseOver || mouseOver)) {
-            scrollHeight -= amount * 22 * GuiConfig.INSTANCE.scrollSensitivity;
+            scrollHeight -= amount * 22 * GuiConfig.get().scrollSensitivity;
             moveWidgets();
             return true;
         }

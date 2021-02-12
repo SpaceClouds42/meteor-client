@@ -1,12 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.meteor.CharTypedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
@@ -38,8 +37,7 @@ public abstract class KeyboardMixin {
             if (GuiKeyEvents.postKeyEvents()) {
                 Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
-                KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
-                MeteorClient.EVENT_BUS.post(event);
+                KeyEvent event = MeteorClient.EVENT_BUS.post(KeyEvent.get(key, KeyAction.get(i)));
 
                 if (event.isCancelled()) info.cancel();
             }
@@ -49,8 +47,7 @@ public abstract class KeyboardMixin {
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, int i, int j, CallbackInfo info) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-            CharTypedEvent event = EventStore.charTypedEvent((char) i);
-            MeteorClient.EVENT_BUS.post(event);
+            CharTypedEvent event = MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) i));
 
             if (event.isCancelled()) info.cancel();
         }

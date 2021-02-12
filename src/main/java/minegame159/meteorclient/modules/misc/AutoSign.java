@@ -1,15 +1,14 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.mixininterface.ISignEditScreen;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixin.SignEditScreenAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.entity.SignBlockEntity;
@@ -29,20 +28,20 @@ public class AutoSign extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof UpdateSignC2SPacket)) return;
 
         text = ((UpdateSignC2SPacket) event.packet).getText();
-    });
+    }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof SignEditScreen) || text == null) return;
 
-        SignBlockEntity sign = ((ISignEditScreen) event.screen).getSign();
+        SignBlockEntity sign = ((SignEditScreenAccessor) event.screen).getSign();
 
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), text[0], text[1], text[2], text[3]));
 
         event.cancel();
-    });
+    }
 }

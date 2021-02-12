@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.commands.commands;
@@ -13,8 +13,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;
@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static minegame159.meteorclient.utils.Utils.mc;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class Friend extends Command {
@@ -38,10 +37,10 @@ public class Friend extends Command {
                         .executes(context -> {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
-                            if (FriendManager.INSTANCE.add(friend)) {
-                                Chat.info("Added (highlight)%s (default)to friends.", friend.name);
+                            if (Friends.get().add(friend)) {
+                                ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
                             } else {
-                                Chat.error("That person is already your friend.");
+                                ChatUtils.prefixError("Friends","That person is already your friend.");
                             }
 
                             return SINGLE_SUCCESS;
@@ -50,19 +49,19 @@ public class Friend extends Command {
                         .executes(context -> {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
-                            if (FriendManager.INSTANCE.remove(friend)) {
-                                Chat.info("Removed (highlight)%s (default)from friends.", friend.name);
+                            if (Friends.get().remove(friend)) {
+                                ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
                             } else {
-                                Chat.error("That person is not your friend.");
+                                ChatUtils.prefixError("Friends", "That person is not your friend.");
                             }
 
                             return SINGLE_SUCCESS;
                         })))
                 .then(literal("list").executes(context -> {
-                    Chat.info("You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
+                    ChatUtils.prefixInfo("Friends","You have (highlight)%d (default)friends:", Friends.get().count());
 
-                    for (minegame159.meteorclient.friends.Friend friend : FriendManager.INSTANCE) {
-                        Chat.info(" - (highlight)%s", friend.name);
+                    for (minegame159.meteorclient.friends.Friend friend : Friends.get()) {
+                        ChatUtils.info(" - (highlight)%s", friend.name);
                     }
 
                     return SINGLE_SUCCESS;

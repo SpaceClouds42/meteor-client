@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.screens.settings;
@@ -11,9 +11,9 @@ import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 
 public class ColorSettingScreen extends WindowScreen {
     private static final Color[] HUE_COLORS = { new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0) };
@@ -230,8 +230,8 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         protected void onCalculateSize(GuiRenderer renderer) {
-            width = 100 * GuiConfig.INSTANCE.guiScale;
-            height = 100 * GuiConfig.INSTANCE.guiScale;
+            width = 100 * GuiConfig.get().guiScale;
+            height = 100 * GuiConfig.get().guiScale;
 
             if (fixedHeight != -1) {
                 height = fixedHeight;
@@ -342,9 +342,9 @@ public class ColorSettingScreen extends WindowScreen {
 
             renderer.quad(Region.FULL, x, y, width, height, WHITE, hueQuad.color, BLACK, BLACK);
 
-            Color color = GuiConfig.INSTANCE.colorEditHandle;
-            if (dragging) color = GuiConfig.INSTANCE.colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1) color = GuiConfig.INSTANCE.colorEditHandleHovered;
+            Color color = GuiConfig.get().colorEditHandle;
+            if (dragging) color = GuiConfig.get().colorEditHandlePressed;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1) color = GuiConfig.get().colorEditHandleHovered;
 
             renderer.quad(Region.FULL, x + handleX - 1, y + handleY - 1, 2, 2, color);
         }
@@ -363,8 +363,8 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         protected void onCalculateSize(GuiRenderer renderer) {
-            width = 100 * GuiConfig.INSTANCE.guiScale;
-            height = 10 * GuiConfig.INSTANCE.guiScale;
+            width = 100 * GuiConfig.get().guiScale;
+            height = 10 * GuiConfig.get().guiScale;
         }
 
         void calculateFromSetting(boolean calculateNow) {
@@ -540,9 +540,9 @@ public class ColorSettingScreen extends WindowScreen {
                 sectionX += sectionWidth;
             }
 
-            Color color = GuiConfig.INSTANCE.colorEditHandle;
-            if (dragging) color = GuiConfig.INSTANCE.colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height) color = GuiConfig.INSTANCE.colorEditHandleHovered;
+            Color color = GuiConfig.get().colorEditHandle;
+            if (dragging) color = GuiConfig.get().colorEditHandlePressed;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height) color = GuiConfig.get().colorEditHandleHovered;
 
             renderer.quad(Region.FULL, x + handleX - 1, y, 2, height, color);
         }

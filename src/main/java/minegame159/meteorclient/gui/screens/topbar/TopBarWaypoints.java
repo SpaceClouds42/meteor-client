@@ -1,13 +1,10 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoint;
@@ -19,13 +16,18 @@ import net.minecraft.client.MinecraftClient;
 public class TopBarWaypoints extends TopBarWindowScreen {
     public TopBarWaypoints() {
         super(TopBarType.Waypoints);
+
+        refreshWidgetsOnInit = true;
     }
 
     @Override
     protected void initWidgets() {
         // Waypoints
-        for (Waypoint waypoint : Waypoints.INSTANCE) {
-            add(new WWaypoint(waypoint)).fillX().expandX();
+        for (Waypoint waypoint : Waypoints.get()) {
+            add(new WWaypoint(waypoint, () -> {
+                clear();
+                initWidgets();
+            })).fillX().expandX();
             row();
         }
 
@@ -35,10 +37,4 @@ public class TopBarWaypoints extends TopBarWindowScreen {
             add.action = () -> MinecraftClient.getInstance().openScreen(new EditWaypointScreen(null));
         }
     }
-
-    @EventHandler
-    private final Listener<WaypointListChangedEvent> onWaypointListChanged = new Listener<>(event -> {
-        clear();
-        initWidgets();
-    });
 }

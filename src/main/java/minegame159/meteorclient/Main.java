@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient;
 
 import javax.swing.*;
@@ -27,9 +32,9 @@ public class Main {
         );
 
         if (option == 0) {
-            openUrl("https://fabricmc.net");
+            openUrl("http://fabricmc.net");
         } else if (option == 1) {
-            openUrl("https://www.curseforge.com/minecraft/mc-mods/fabric-api");
+            openUrl("http://www.curseforge.com/minecraft/mc-mods/fabric-api");
         } else if (option == 2) {
             String os = System.getProperty("os.name").toLowerCase();
 

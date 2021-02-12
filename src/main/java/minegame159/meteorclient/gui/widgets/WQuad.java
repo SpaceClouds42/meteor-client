@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.gui.widgets;
@@ -19,7 +19,7 @@ public class WQuad extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         width = 6 * s + renderer.textHeight() + 6 * s;
         height = 6 * s + renderer.textHeight() + 6 * s;
     }
